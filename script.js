@@ -1407,95 +1407,59 @@ function spawnNoteParticles(parentElement) {
   }
 }
 
-// --- Default Automatic Background Music Controller ---
+// --- True Automatic Background Music Controller (Zero Buttons, Zero Prompts) ---
 function initMusicAutoplay() {
-  let bgMusic = document.getElementById('bg-music');
-  if (!bgMusic) {
-    bgMusic = document.createElement('audio');
-    bgMusic.id = 'bg-music';
-    document.body.appendChild(bgMusic);
-  }
+  const bgMusic = document.getElementById('bg-music') || new Audio('assets/bg_music.mp3');
   bgMusic.src = 'assets/bg_music.mp3';
   bgMusic.loop = true;
-  bgMusic.volume = 0.9;
+  bgMusic.volume = 0.95;
   bgMusic.setAttribute('playsinline', '');
   bgMusic.setAttribute('autoplay', '');
 
-  let tapPrompt = null;
+  let hasStarted = false;
 
-  const showTapPrompt = () => {
-    if (tapPrompt || !bgMusic.paused) return;
-    tapPrompt = document.createElement('div');
-    tapPrompt.id = 'tap-to-play-prompt';
-    tapPrompt.innerHTML = '<span>🎵 Tap anywhere to play music! 🚀</span>';
-    tapPrompt.style.cssText = `
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: linear-gradient(135deg, #f59e0b, #ec4899);
-      color: #fff;
-      padding: 10px 22px;
-      border-radius: 9999px;
-      font-weight: 700;
-      font-size: 0.9rem;
-      box-shadow: 0 10px 25px rgba(245, 158, 11, 0.5);
-      z-index: 99999;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      animation: pulseMusicBtn 1.5s infinite alternate ease-in-out;
-    `;
-    tapPrompt.addEventListener('click', (e) => {
-      e.stopPropagation();
-      startPlayback();
-    });
-    document.body.appendChild(tapPrompt);
-  };
+  const startAudioPlayback = () => {
+    if (hasStarted && !bgMusic.paused) return;
 
-  const removeTapPrompt = () => {
-    if (tapPrompt) {
-      tapPrompt.remove();
-      tapPrompt = null;
-    }
-  };
-
-  const startPlayback = () => {
     sounds.init();
     const playPromise = bgMusic.play();
     if (playPromise !== undefined) {
       playPromise.then(() => {
-        removeTapPrompt();
-      }).catch((err) => {
-        // Autoplay policy awaiting user tap on mobile
-        showTapPrompt();
+        hasStarted = true;
+        bgMusic.muted = false;
+      }).catch(() => {
+        // If browser blocks unmuted sound before any touch, start muted first so it is already running
+        bgMusic.muted = true;
+        bgMusic.play().then(() => {
+          hasStarted = true;
+        }).catch(() => {});
       });
     }
   };
 
-  // 1. Immediate autoplay attempts on open & load
-  startPlayback();
-  window.addEventListener('load', startPlayback);
-  document.addEventListener('DOMContentLoaded', startPlayback);
+  // 1. Immediate play on site open
+  startAudioPlayback();
+  document.addEventListener('DOMContentLoaded', startAudioPlayback);
+  window.addEventListener('load', startAudioPlayback);
+  window.addEventListener('pageshow', startAudioPlayback);
+  window.addEventListener('focus', startAudioPlayback);
 
-  // 2. Gesture trigger for mobile browsers (instant audio on first touch, tap, or click anywhere)
-  const onGesture = () => {
-    startPlayback();
-    if (!bgMusic.paused) {
-      ['click', 'touchstart', 'touchend', 'pointerdown', 'keydown'].forEach(evt => {
-        window.removeEventListener(evt, onGesture, true);
-        document.removeEventListener(evt, onGesture, true);
+  // 2. Unmute and start full audio seamlessly on ANY natural screen touch, swipe, or scroll
+  const onAnyNaturalGesture = () => {
+    bgMusic.muted = false;
+    startAudioPlayback();
+    if (!bgMusic.paused && !bgMusic.muted) {
+      ['touchstart', 'touchend', 'touchmove', 'scroll', 'pointerdown', 'pointermove', 'click', 'wheel', 'keydown'].forEach(evt => {
+        window.removeEventListener(evt, onAnyNaturalGesture, true);
+        document.removeEventListener(evt, onAnyNaturalGesture, true);
       });
     }
   };
 
-  ['click', 'touchstart', 'touchend', 'pointerdown', 'keydown'].forEach(evt => {
-    window.addEventListener(evt, onGesture, { capture: true });
-    document.addEventListener(evt, onGesture, { capture: true });
+  ['touchstart', 'touchend', 'touchmove', 'scroll', 'pointerdown', 'pointermove', 'click', 'wheel', 'keydown'].forEach(evt => {
+    window.addEventListener(evt, onAnyNaturalGesture, { passive: true, capture: true });
+    document.addEventListener(evt, onAnyNaturalGesture, { passive: true, capture: true });
   });
-
-  bgMusic.addEventListener('play', removeTapPrompt);
 }
 
 // --- Wishes Filter Pills Smooth Auto-Sliding ---
