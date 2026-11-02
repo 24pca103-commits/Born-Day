@@ -3,6 +3,8 @@ class SoundSystem {
   constructor() {
     this.ctx = null;
     this.muted = false;
+    this.isPlayingMelody = false;
+    this.melodyTimeouts = [];
   }
 
   init() {
@@ -201,9 +203,17 @@ class SoundSystem {
     } catch (e) {}
   }
 
-  playBirthdayMelody() {
+  stopBirthdayMelody() {
+    this.melodyTimeouts.forEach(t => clearTimeout(t));
+    this.melodyTimeouts = [];
+    this.isPlayingMelody = false;
+  }
+
+  playBirthdayMelody(loop = true) {
     if (this.muted) return;
+    this.stopBirthdayMelody();
     this.init();
+    this.isPlayingMelody = true;
     // Notes of "Happy Birthday To You":
     // G4, G4, A4, G4, C5, B4
     const melody = [
@@ -241,12 +251,22 @@ class SoundSystem {
     ];
 
     melody.forEach(item => {
-      setTimeout(() => {
-        if (!this.muted) {
+      const t = setTimeout(() => {
+        if (!this.muted && this.isPlayingMelody) {
           this.playTone(item.note, 'triangle', item.dur, 0.14);
         }
       }, item.delay);
+      this.melodyTimeouts.push(t);
     });
+
+    if (loop) {
+      const loopTimeout = setTimeout(() => {
+        if (!this.muted && this.isPlayingMelody) {
+          this.playBirthdayMelody(true);
+        }
+      }, 14000);
+      this.melodyTimeouts.push(loopTimeout);
+    }
   }
 
   playKnifeSlice() {
@@ -1283,19 +1303,115 @@ function spawnNoteParticles(parentElement) {
   }
 }
 
-// --- Audio & Celebration Trigger Initialization ---
-function initCelebrationControls() {
+// --- Music Autoplay & Toggle Controller ---
+function initMusicAutoplayAndControls() {
   const musicBtn = document.getElementById('toggle-music');
-  const celebrateBtn = document.getElementById('global-celebrate-btn');
 
+  const updateMusicBtnUI = (isPlaying) => {
+    if (!musicBtn) return;
+    if (isPlaying) {
+      musicBtn.innerHTML = '🎵';
+      musicBtn.setAttribute('title', 'Pause Birthday Melody');
+      musicBtn.classList.add('music-playing');
+    } else {
+      musicBtn.innerHTML = '🔇';
+      musicBtn.setAttribute('title', 'Play Birthday Melody');
+      musicBtn.classList.remove('music-playing');
+    }
+  };
+
+  const startPlayback = () => {
+    sounds.init();
+    sounds.muted = false;
+    sounds.playBirthdayMelody(true);
+    updateMusicBtnUI(true);
+  };
+
+  // 1. Try immediate autoplay on page load
+  try {
+    startPlayback();
+  } catch (e) {}
+
+  // 2. Fallback to start on first interaction (required by mobile/desktop browser autoplay policies)
+  let userInteracted = false;
+  const onFirstInteraction = () => {
+    if (userInteracted) return;
+    userInteracted = true;
+    ['click', 'touchstart', 'scroll', 'keydown', 'pointerdown'].forEach(evt => {
+      document.removeEventListener(evt, onFirstInteraction);
+    });
+    if (!sounds.isPlayingMelody && !sounds.muted) {
+      startPlayback();
+    }
+  };
+
+  ['click', 'touchstart', 'scroll', 'keydown', 'pointerdown'].forEach(evt => {
+    document.addEventListener(evt, onFirstInteraction, { passive: true, once: true });
+  });
+
+  // 3. User toggle button: Click stops, next click plays
   if (musicBtn) {
-    musicBtn.addEventListener('click', () => {
+    musicBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      userInteracted = true;
       sounds.init();
-      sounds.playBirthdayMelody();
-      triggerConfetti(50, 70);
-      showToast("🎵 Playing Birthday Melody for Seilesh Sir!");
+      if (sounds.isPlayingMelody) {
+        sounds.stopBirthdayMelody();
+        sounds.muted = true;
+        updateMusicBtnUI(false);
+        showToast("🔇 Birthday Song Paused");
+      } else {
+        sounds.muted = false;
+        startPlayback();
+        triggerConfetti(40, 60);
+        showToast("🎵 Playing Birthday Melody for Seilesh Sir!");
+      }
     });
   }
+}
+
+// --- Wishes Filter Pills Smooth Auto-Sliding ---
+function initFilterPillsAutoSlide() {
+  const container = document.querySelector('.filter-pills');
+  if (!container) return;
+
+  let isInteracting = false;
+  let resumeTimer = null;
+  let direction = 1;
+  const scrollStep = 0.75;
+
+  function autoScrollLoop() {
+    if (!isInteracting && container.scrollWidth > container.clientWidth) {
+      const maxScroll = container.scrollWidth - container.clientWidth;
+      if (container.scrollLeft >= maxScroll - 2) {
+        direction = -1;
+      } else if (container.scrollLeft <= 2) {
+        direction = 1;
+      }
+      container.scrollLeft += direction * scrollStep;
+    }
+    requestAnimationFrame(autoScrollLoop);
+  }
+  requestAnimationFrame(autoScrollLoop);
+
+  const pauseSliding = () => {
+    isInteracting = true;
+    clearTimeout(resumeTimer);
+    resumeTimer = setTimeout(() => {
+      isInteracting = false;
+    }, 4000);
+  };
+
+  container.addEventListener('touchstart', pauseSliding, { passive: true });
+  container.addEventListener('touchmove', pauseSliding, { passive: true });
+  container.addEventListener('wheel', pauseSliding, { passive: true });
+  container.addEventListener('mousedown', pauseSliding);
+  container.addEventListener('click', pauseSliding);
+}
+
+// --- Audio & Celebration Trigger Initialization ---
+function initCelebrationControls() {
+  const celebrateBtn = document.getElementById('global-celebrate-btn');
 
   if (celebrateBtn) {
     celebrateBtn.addEventListener('click', () => {
@@ -1349,5 +1465,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initWishesBoard();
   initCheerBlaster();
   initCelebrationControls();
+  initMusicAutoplayAndControls();
+  initFilterPillsAutoSlide();
   initMobileNav();
 });
