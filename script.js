@@ -590,12 +590,29 @@ function initWishesBoard() {
   const openModalHeroBtn = document.getElementById('btn-open-wish-modal-hero');
   const closeModalBtn = document.getElementById('modal-close-btn');
 
-  // Load from localStorage (v5 ensures clean fresh board without old mock wishes)
-  let storedWishes = JSON.parse(localStorage.getItem('ixly_ceo_wishes_v5'));
-  if (!storedWishes) {
-    storedWishes = [];
-    localStorage.setItem('ixly_ceo_wishes_v5', JSON.stringify(storedWishes));
+  // --- Shared Backend Wishes System ---
+  let storedWishes = JSON.parse(localStorage.getItem('ixly_ceo_wishes_v5')) || [];
+
+  // Function to sync wishes from central server so EVERY phone & laptop sees them in real-time
+  async function fetchSharedWishes() {
+    try {
+      const res = await fetch('/api/wishes', { cache: 'no-store' });
+      if (res.ok) {
+        const remoteWishes = await res.json();
+        if (Array.isArray(remoteWishes)) {
+          storedWishes = remoteWishes;
+          localStorage.setItem('ixly_ceo_wishes_v5', JSON.stringify(storedWishes));
+          render(currentFilter);
+        }
+      }
+    } catch (e) {
+      // Fallback gracefully to offline localStorage
+    }
   }
+
+  // Initial fetch and automatic background sync every 4 seconds
+  fetchSharedWishes();
+  setInterval(fetchSharedWishes, 4000);
 
   let currentFilter = 'all';
 
@@ -721,6 +738,15 @@ function initWishesBoard() {
           sounds.playPop();
           render(currentFilter);
           showToast("🗑️ Wish removed successfully!");
+
+          // Delete from shared server database
+          fetch(`/api/wishes/${id}`, { method: 'DELETE' }).catch(() => {
+            fetch('/api/wishes/delete', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id })
+            }).catch(e => console.log('Delete sync error:', e));
+          });
         }
       });
     });
@@ -732,7 +758,8 @@ function initWishesBoard() {
         const id = parseInt(btn.getAttribute('data-id'));
         const targetWish = storedWishes.find(item => item.id === id);
         if (targetWish) {
-          if (!btn.classList.contains('liked')) {
+          const isLiking = !btn.classList.contains('liked');
+          if (isLiking) {
             targetWish.likes++;
             btn.classList.add('liked');
           } else {
@@ -741,6 +768,13 @@ function initWishesBoard() {
           }
           btn.querySelector('.like-count').innerText = targetWish.likes;
           localStorage.setItem('ixly_ceo_wishes_v5', JSON.stringify(storedWishes));
+
+          // Sync like count with server
+          fetch('/api/wishes/like', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, liked: isLiking })
+          }).catch(e => console.log('Like sync error:', e));
         }
       });
     });
@@ -810,6 +844,15 @@ function initWishesBoard() {
       storedWishes.unshift(newWish);
       localStorage.setItem('ixly_ceo_wishes_v5', JSON.stringify(storedWishes));
       render(currentFilter);
+
+      // Post to shared server so EVERY phone and laptop sees this wish
+      fetch('/api/wishes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newWish)
+      }).catch(err => {
+        console.error('Failed to post wish to server:', err);
+      });
 
       form.reset();
       closeWishModal();
@@ -1318,60 +1361,65 @@ function spawnNoteParticles(parentElement) {
   }
 }
 
-// --- Music Autoplay & Toggle Controller (Hukum - Thalaivar Alappara) ---
+// --- Music Autoplay & Toggle Controller ---
 function initMusicAutoplayAndControls() {
   const musicBtn = document.getElementById('toggle-music');
   let bgMusic = document.getElementById('bg-music');
   if (!bgMusic) {
-    bgMusic = new Audio('assets/Hukum---Thalaivar-Alappara-MassTamilan.dev.mp3');
+    bgMusic = document.createElement('audio');
     bgMusic.id = 'bg-music';
+    bgMusic.src = 'assets/WhatsApp Audio 2026-11-02 at 6.18.55 PM.mpeg';
     document.body.appendChild(bgMusic);
   }
   bgMusic.loop = true;
-  bgMusic.volume = 0.85;
+  bgMusic.volume = 0.9;
 
   const updateMusicBtnUI = (isPlaying) => {
     if (!musicBtn) return;
     if (isPlaying) {
       musicBtn.innerHTML = '🎵';
-      musicBtn.setAttribute('title', 'Pause Hukum Song');
+      musicBtn.setAttribute('title', 'Pause Music');
       musicBtn.classList.add('music-playing');
     } else {
       musicBtn.innerHTML = '🔇';
-      musicBtn.setAttribute('title', 'Play Hukum Song');
+      musicBtn.setAttribute('title', 'Play Music');
       musicBtn.classList.remove('music-playing');
     }
   };
 
   const startPlayback = () => {
+    sounds.init();
     const playPromise = bgMusic.play();
     if (playPromise !== undefined) {
       playPromise.then(() => {
         updateMusicBtnUI(true);
       }).catch((err) => {
-        console.log("Autoplay waiting for user touch/scroll gesture:", err);
+        // Will be picked up by the first user gesture (touch, scroll, click)
       });
     }
   };
 
   // 1. Immediate autoplay on page load
   startPlayback();
+  window.addEventListener('load', startPlayback);
 
-  // 2. Fallback to start on first interaction (required by strict mobile/desktop browser autoplay policies)
+  // 2. Fallback to start on first interaction (required by strict mobile browser autoplay policies)
   let userInteracted = false;
   const onFirstInteraction = () => {
     if (userInteracted) return;
     userInteracted = true;
-    ['click', 'touchstart', 'scroll', 'keydown', 'pointerdown'].forEach(evt => {
-      document.removeEventListener(evt, onFirstInteraction);
+    ['click', 'touchstart', 'touchend', 'scroll', 'keydown', 'pointerdown'].forEach(evt => {
+      window.removeEventListener(evt, onFirstInteraction, true);
+      document.removeEventListener(evt, onFirstInteraction, true);
     });
     if (bgMusic.paused) {
       startPlayback();
     }
   };
 
-  ['click', 'touchstart', 'scroll', 'keydown', 'pointerdown'].forEach(evt => {
-    document.addEventListener(evt, onFirstInteraction, { passive: true, once: true });
+  ['click', 'touchstart', 'touchend', 'scroll', 'keydown', 'pointerdown'].forEach(evt => {
+    window.addEventListener(evt, onFirstInteraction, { passive: true, capture: true });
+    document.addEventListener(evt, onFirstInteraction, { passive: true, capture: true });
   });
 
   // 3. User toggle button: Click stops, next click plays
@@ -1386,7 +1434,7 @@ function initMusicAutoplayAndControls() {
       } else {
         startPlayback();
         triggerConfetti(40, 60);
-        showToast("🔥 Playing Hukum - Thalaivar Alappara for Chief!");
+        showToast("🎵 Playing Celebration Music!");
       }
     });
   }
