@@ -600,9 +600,20 @@ function initWishesBoard() {
       if (res.ok) {
         const remoteWishes = await res.json();
         if (Array.isArray(remoteWishes)) {
-          storedWishes = remoteWishes;
-          localStorage.setItem('ixly_ceo_wishes_v5', JSON.stringify(storedWishes));
-          render(currentFilter);
+          // If server is empty but local has wishes, upload local wishes to server
+          if (remoteWishes.length === 0 && storedWishes.length > 0) {
+            for (const localWish of storedWishes) {
+              await fetch('/api/wishes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(localWish)
+              }).catch(() => {});
+            }
+          } else {
+            storedWishes = remoteWishes;
+            localStorage.setItem('ixly_ceo_wishes_v5', JSON.stringify(storedWishes));
+            render(currentFilter);
+          }
         }
       }
     } catch (e) {
@@ -615,6 +626,31 @@ function initWishesBoard() {
   setInterval(fetchSharedWishes, 4000);
 
   let currentFilter = 'all';
+
+  // Update count badges on the filter pills
+  function updateFilterPillCounts() {
+    const counts = {
+      all: storedWishes.length,
+      dev: storedWishes.filter(w => w.department === 'dev').length,
+      manager: storedWishes.filter(w => w.department === 'manager').length,
+      hr: storedWishes.filter(w => w.department === 'hr').length,
+      client: storedWishes.filter(w => w.department === 'client').length
+    };
+
+    filterBtns.forEach(btn => {
+      const f = btn.getAttribute('data-filter');
+      const baseLabel = {
+        all: 'All Wishes',
+        dev: 'Developer Team 💻',
+        manager: 'Manager Team 📊',
+        hr: 'HR Team 🤝',
+        client: 'Client Team 🌐'
+      }[f] || f;
+      
+      const count = counts[f] || 0;
+      btn.innerHTML = `${baseLabel} ${count > 0 ? `<span class="filter-count-badge">${count}</span>` : ''}`;
+    });
+  }
 
   // --- Modal Open & Close Logic ---
   function openWishModal() {
@@ -659,6 +695,7 @@ function initWishesBoard() {
   function render(filter = 'all') {
     if (!grid) return;
     grid.innerHTML = '';
+    updateFilterPillCounts();
 
     const list = filter === 'all' 
       ? storedWishes 
@@ -843,13 +880,22 @@ function initWishesBoard() {
 
       storedWishes.unshift(newWish);
       localStorage.setItem('ixly_ceo_wishes_v5', JSON.stringify(storedWishes));
-      render(currentFilter);
+
+      // Reset to "All Wishes" tab so the new wish is immediately visible to everyone
+      currentFilter = 'all';
+      filterBtns.forEach(b => {
+        if (b.getAttribute('data-filter') === 'all') b.classList.add('active');
+        else b.classList.remove('active');
+      });
+      render('all');
 
       // Post to shared server so EVERY phone and laptop sees this wish
       fetch('/api/wishes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newWish)
+      }).then(() => {
+        fetchSharedWishes();
       }).catch(err => {
         console.error('Failed to post wish to server:', err);
       });
@@ -1361,9 +1407,8 @@ function spawnNoteParticles(parentElement) {
   }
 }
 
-// --- Music Autoplay & Toggle Controller ---
-function initMusicAutoplayAndControls() {
-  const musicBtn = document.getElementById('toggle-music');
+// --- Default Automatic Background Music Controller ---
+function initMusicAutoplay() {
   let bgMusic = document.getElementById('bg-music');
   if (!bgMusic) {
     bgMusic = document.createElement('audio');
@@ -1374,36 +1419,21 @@ function initMusicAutoplayAndControls() {
   bgMusic.loop = true;
   bgMusic.volume = 0.9;
 
-  const updateMusicBtnUI = (isPlaying) => {
-    if (!musicBtn) return;
-    if (isPlaying) {
-      musicBtn.innerHTML = '🎵';
-      musicBtn.setAttribute('title', 'Pause Music');
-      musicBtn.classList.add('music-playing');
-    } else {
-      musicBtn.innerHTML = '🔇';
-      musicBtn.setAttribute('title', 'Play Music');
-      musicBtn.classList.remove('music-playing');
-    }
-  };
-
   const startPlayback = () => {
     sounds.init();
     const playPromise = bgMusic.play();
     if (playPromise !== undefined) {
-      playPromise.then(() => {
-        updateMusicBtnUI(true);
-      }).catch((err) => {
-        // Will be picked up by the first user gesture (touch, scroll, click)
+      playPromise.catch((err) => {
+        // Autoplay policy awaiting user gesture
       });
     }
   };
 
-  // 1. Immediate autoplay on page load
+  // 1. Immediate autoplay on page open
   startPlayback();
   window.addEventListener('load', startPlayback);
 
-  // 2. Fallback to start on first interaction (required by strict mobile browser autoplay policies)
+  // 2. Gesture trigger for mobile browsers (starts instant audio on first touch, scroll, or tap)
   let userInteracted = false;
   const onFirstInteraction = () => {
     if (userInteracted) return;
@@ -1421,23 +1451,6 @@ function initMusicAutoplayAndControls() {
     window.addEventListener(evt, onFirstInteraction, { passive: true, capture: true });
     document.addEventListener(evt, onFirstInteraction, { passive: true, capture: true });
   });
-
-  // 3. User toggle button: Click stops, next click plays
-  if (musicBtn) {
-    musicBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      userInteracted = true;
-      if (!bgMusic.paused) {
-        bgMusic.pause();
-        updateMusicBtnUI(false);
-        showToast("🔇 Music Paused");
-      } else {
-        startPlayback();
-        triggerConfetti(40, 60);
-        showToast("🎵 Playing Celebration Music!");
-      }
-    });
-  }
 }
 
 // --- Wishes Filter Pills Smooth Auto-Sliding ---
@@ -1535,7 +1548,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initWishesBoard();
   initCheerBlaster();
   initCelebrationControls();
-  initMusicAutoplayAndControls();
+  initMusicAutoplay();
   initFilterPillsAutoSlide();
   initMobileNav();
 });
