@@ -1413,44 +1413,89 @@ function initMusicAutoplay() {
   if (!bgMusic) {
     bgMusic = document.createElement('audio');
     bgMusic.id = 'bg-music';
-    bgMusic.src = 'assets/WhatsApp Audio 2026-11-02 at 6.18.55 PM.mpeg';
     document.body.appendChild(bgMusic);
   }
+  bgMusic.src = 'assets/bg_music.mp3';
   bgMusic.loop = true;
   bgMusic.volume = 0.9;
+  bgMusic.setAttribute('playsinline', '');
+  bgMusic.setAttribute('autoplay', '');
+
+  let tapPrompt = null;
+
+  const showTapPrompt = () => {
+    if (tapPrompt || !bgMusic.paused) return;
+    tapPrompt = document.createElement('div');
+    tapPrompt.id = 'tap-to-play-prompt';
+    tapPrompt.innerHTML = '<span>🎵 Tap anywhere to play music! 🚀</span>';
+    tapPrompt.style.cssText = `
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #f59e0b, #ec4899);
+      color: #fff;
+      padding: 10px 22px;
+      border-radius: 9999px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      box-shadow: 0 10px 25px rgba(245, 158, 11, 0.5);
+      z-index: 99999;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: pulseMusicBtn 1.5s infinite alternate ease-in-out;
+    `;
+    tapPrompt.addEventListener('click', (e) => {
+      e.stopPropagation();
+      startPlayback();
+    });
+    document.body.appendChild(tapPrompt);
+  };
+
+  const removeTapPrompt = () => {
+    if (tapPrompt) {
+      tapPrompt.remove();
+      tapPrompt = null;
+    }
+  };
 
   const startPlayback = () => {
     sounds.init();
     const playPromise = bgMusic.play();
     if (playPromise !== undefined) {
-      playPromise.catch((err) => {
-        // Autoplay policy awaiting user gesture
+      playPromise.then(() => {
+        removeTapPrompt();
+      }).catch((err) => {
+        // Autoplay policy awaiting user tap on mobile
+        showTapPrompt();
       });
     }
   };
 
-  // 1. Immediate autoplay on page open
+  // 1. Immediate autoplay attempts on open & load
   startPlayback();
   window.addEventListener('load', startPlayback);
+  document.addEventListener('DOMContentLoaded', startPlayback);
 
-  // 2. Gesture trigger for mobile browsers (starts instant audio on first touch, scroll, or tap)
-  let userInteracted = false;
-  const onFirstInteraction = () => {
-    if (userInteracted) return;
-    userInteracted = true;
-    ['click', 'touchstart', 'touchend', 'scroll', 'keydown', 'pointerdown'].forEach(evt => {
-      window.removeEventListener(evt, onFirstInteraction, true);
-      document.removeEventListener(evt, onFirstInteraction, true);
-    });
-    if (bgMusic.paused) {
-      startPlayback();
+  // 2. Gesture trigger for mobile browsers (instant audio on first touch, tap, or click anywhere)
+  const onGesture = () => {
+    startPlayback();
+    if (!bgMusic.paused) {
+      ['click', 'touchstart', 'touchend', 'pointerdown', 'keydown'].forEach(evt => {
+        window.removeEventListener(evt, onGesture, true);
+        document.removeEventListener(evt, onGesture, true);
+      });
     }
   };
 
-  ['click', 'touchstart', 'touchend', 'scroll', 'keydown', 'pointerdown'].forEach(evt => {
-    window.addEventListener(evt, onFirstInteraction, { passive: true, capture: true });
-    document.addEventListener(evt, onFirstInteraction, { passive: true, capture: true });
+  ['click', 'touchstart', 'touchend', 'pointerdown', 'keydown'].forEach(evt => {
+    window.addEventListener(evt, onGesture, { capture: true });
+    document.addEventListener(evt, onGesture, { capture: true });
   });
+
+  bgMusic.addEventListener('play', removeTapPrompt);
 }
 
 // --- Wishes Filter Pills Smooth Auto-Sliding ---

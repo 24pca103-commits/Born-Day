@@ -1,1 +1,28 @@
-[]
+[
+  {
+    "name": "Priya Raman",
+    "role": "HR Lead",
+    "department": "hr",
+    "avatarBg": "linear-gradient(135deg, #ec4899, #a855f7)",
+    "initials": "PR",
+    "badge": "🤝 HR Team",
+    "emoji": "👑",
+    "message": "Happy Birthday Seilesh Sir! Thank you for being such an inspirational leader for all of us at Ixly!",
+    "likes": 1,
+    "id": 1793625762184,
+    "createdAt": "2026-11-02T13:22:42.184Z"
+  },
+  {
+    "id": 1793625514012,
+    "name": "Kanmani",
+    "role": "Software developer",
+    "department": "dev",
+    "avatarBg": "linear-gradient(135deg, #6366f1, #8b5cf6)",
+    "initials": "K",
+    "badge": "💻 Developer Team",
+    "emoji": "🎂",
+    "message": "Hzgdhdhdhhrhjfjd",
+    "likes": 1,
+    "createdAt": "2026-11-02T13:18:34.093Z"
+  }
+]
