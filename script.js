@@ -376,7 +376,6 @@ function triggerConfetti(particleCount = 70, spread = 65, origin = { y: 0.6 }) {
 
 function fullGrandCelebration() {
   sounds.playCheerChime();
-  sounds.playBirthdayMelody();
 
   if (typeof confetti === 'function') {
     const end = Date.now() + 3.5 * 1000;
@@ -1215,8 +1214,6 @@ function initChibiSquad() {
         spawnNoteParticles(card);
       }
 
-      showToast(conf.toast);
-
       setTimeout(() => {
         if (!isSquadPartyActive && card) {
           card.classList.remove('active');
@@ -1248,10 +1245,7 @@ let isSquadPartyActive = false;
 function triggerAllSquadParty() {
   isSquadPartyActive = true;
   sounds.init();
-  sounds.playBirthdayMelody();
   fullGrandCelebration();
-
-  showToast("🎉 SQUAD DANCE PARTY ACTIVATED! All Chibis are grooving together! 🕺✨");
 
   // Activate all 6 chibis simultaneously
   chibiConfigs.forEach((conf, idx) => {
@@ -1303,36 +1297,46 @@ function spawnNoteParticles(parentElement) {
   }
 }
 
-// --- Music Autoplay & Toggle Controller ---
+// --- Music Autoplay & Toggle Controller (Hukum - Thalaivar Alappara) ---
 function initMusicAutoplayAndControls() {
   const musicBtn = document.getElementById('toggle-music');
+  let bgMusic = document.getElementById('bg-music');
+  if (!bgMusic) {
+    bgMusic = new Audio('assets/Hukum---Thalaivar-Alappara-MassTamilan.dev.mp3');
+    bgMusic.id = 'bg-music';
+    document.body.appendChild(bgMusic);
+  }
+  bgMusic.loop = true;
+  bgMusic.volume = 0.85;
 
   const updateMusicBtnUI = (isPlaying) => {
     if (!musicBtn) return;
     if (isPlaying) {
       musicBtn.innerHTML = '🎵';
-      musicBtn.setAttribute('title', 'Pause Birthday Melody');
+      musicBtn.setAttribute('title', 'Pause Hukum Song');
       musicBtn.classList.add('music-playing');
     } else {
       musicBtn.innerHTML = '🔇';
-      musicBtn.setAttribute('title', 'Play Birthday Melody');
+      musicBtn.setAttribute('title', 'Play Hukum Song');
       musicBtn.classList.remove('music-playing');
     }
   };
 
   const startPlayback = () => {
-    sounds.init();
-    sounds.muted = false;
-    sounds.playBirthdayMelody(true);
-    updateMusicBtnUI(true);
+    const playPromise = bgMusic.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        updateMusicBtnUI(true);
+      }).catch((err) => {
+        console.log("Autoplay waiting for user touch/scroll gesture:", err);
+      });
+    }
   };
 
-  // 1. Try immediate autoplay on page load
-  try {
-    startPlayback();
-  } catch (e) {}
+  // 1. Immediate autoplay on page load
+  startPlayback();
 
-  // 2. Fallback to start on first interaction (required by mobile/desktop browser autoplay policies)
+  // 2. Fallback to start on first interaction (required by strict mobile/desktop browser autoplay policies)
   let userInteracted = false;
   const onFirstInteraction = () => {
     if (userInteracted) return;
@@ -1340,7 +1344,7 @@ function initMusicAutoplayAndControls() {
     ['click', 'touchstart', 'scroll', 'keydown', 'pointerdown'].forEach(evt => {
       document.removeEventListener(evt, onFirstInteraction);
     });
-    if (!sounds.isPlayingMelody && !sounds.muted) {
+    if (bgMusic.paused) {
       startPlayback();
     }
   };
@@ -1354,17 +1358,14 @@ function initMusicAutoplayAndControls() {
     musicBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       userInteracted = true;
-      sounds.init();
-      if (sounds.isPlayingMelody) {
-        sounds.stopBirthdayMelody();
-        sounds.muted = true;
+      if (!bgMusic.paused) {
+        bgMusic.pause();
         updateMusicBtnUI(false);
-        showToast("🔇 Birthday Song Paused");
+        showToast("🔇 Music Paused");
       } else {
-        sounds.muted = false;
         startPlayback();
         triggerConfetti(40, 60);
-        showToast("🎵 Playing Birthday Melody for Seilesh Sir!");
+        showToast("🔥 Playing Hukum - Thalaivar Alappara for Chief!");
       }
     });
   }

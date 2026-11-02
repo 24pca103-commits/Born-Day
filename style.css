@@ -198,14 +198,15 @@ nav {
 }
 
 .company-logo-img {
-  height: 44px;
+  height: 48px;
   width: auto;
+  max-width: 170px;
   object-fit: contain;
   background: transparent;
   padding: 0;
   border: none;
   box-shadow: none;
-  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.6));
+  filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.7));
   transition: transform 0.25s ease;
 }
 
@@ -2374,7 +2375,8 @@ footer {
   }
 
   .company-logo-img {
-    height: 38px;
+    height: 42px;
+    max-width: 145px;
   }
 
   .celebrate-text {
@@ -2823,7 +2825,8 @@ footer {
   }
 
   .company-logo-img {
-    height: 32px;
+    height: 38px;
+    max-width: 130px;
   }
 
   .hero-showcase-title {
@@ -2883,7 +2886,8 @@ footer {
 
 @media (max-width: 360px) {
   .company-logo-img {
-    height: 28px;
+    height: 34px;
+    max-width: 115px;
   }
 
   .nav-container {
