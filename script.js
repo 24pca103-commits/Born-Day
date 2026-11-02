@@ -1563,6 +1563,7 @@ function initMomentsGallery() {
   const moments = [
     {
       id: 1,
+      letter: 'H',
       src: 'assets/gallery/chief_14_skydiving_palm_dubai.jpg',
       cat: 'adventure',
       title: 'Palm Jumeirah Flight, Dubai',
@@ -1571,6 +1572,7 @@ function initMomentsGallery() {
     },
     {
       id: 2,
+      letter: 'A',
       src: 'assets/gallery/chief_13_skydiving_freefall.jpg',
       cat: 'adventure',
       title: 'Fearless Freefall 13,000ft',
@@ -1579,6 +1581,7 @@ function initMomentsGallery() {
     },
     {
       id: 3,
+      letter: 'P',
       src: 'assets/gallery/chief_12_skydiving_ground.jpg',
       cat: 'adventure',
       title: 'Sky Mission Ready',
@@ -1587,6 +1590,7 @@ function initMomentsGallery() {
     },
     {
       id: 4,
+      letter: 'P',
       src: 'assets/gallery/chief_4_mountains.jpg',
       cat: 'adventure',
       title: 'Alpine Mountain Camp',
@@ -1595,6 +1599,7 @@ function initMomentsGallery() {
     },
     {
       id: 5,
+      letter: 'Y',
       src: 'assets/gallery/chief_5_cycle.jpg',
       cat: 'adventure',
       title: 'Endurance & Vitality',
@@ -1603,6 +1608,7 @@ function initMomentsGallery() {
     },
     {
       id: 6,
+      letter: 'B',
       src: 'assets/gallery/chief_10_tower_bridge.jpg',
       cat: 'global',
       title: 'Iconic Tower Bridge, London',
@@ -1611,6 +1617,7 @@ function initMomentsGallery() {
     },
     {
       id: 7,
+      letter: 'I',
       src: 'assets/gallery/chief_9_canary_wharf.jpg',
       cat: 'global',
       title: 'Canary Wharf Financial Hub',
@@ -1619,6 +1626,7 @@ function initMomentsGallery() {
     },
     {
       id: 8,
+      letter: 'R',
       src: 'assets/gallery/chief_11_london_street.jpg',
       cat: 'global',
       title: 'Regent Street, London',
@@ -1627,6 +1635,7 @@ function initMomentsGallery() {
     },
     {
       id: 9,
+      letter: 'T',
       src: 'assets/gallery/chief_8_family_baby.jpg',
       cat: 'family',
       title: 'Lifting Pure Joy',
@@ -1635,6 +1644,7 @@ function initMomentsGallery() {
     },
     {
       id: 10,
+      letter: 'H',
       src: 'assets/gallery/chief_7_family_cafe.jpg',
       cat: 'family',
       title: 'Tender Bonding Moments',
@@ -1643,6 +1653,7 @@ function initMomentsGallery() {
     },
     {
       id: 11,
+      letter: 'D',
       src: 'assets/gallery/chief_6_heritage.jpg',
       cat: 'family',
       title: 'Roots & Heritage',
@@ -1651,6 +1662,7 @@ function initMomentsGallery() {
     },
     {
       id: 12,
+      letter: 'A',
       src: 'assets/gallery/chief_1_profile.jpg',
       cat: 'vision',
       title: 'The Signature Profile',
@@ -1659,6 +1671,7 @@ function initMomentsGallery() {
     },
     {
       id: 13,
+      letter: 'Y',
       src: 'assets/gallery/chief_2_smile.jpg',
       cat: 'vision',
       title: 'Warmth & Radiance',
@@ -1667,6 +1680,7 @@ function initMomentsGallery() {
     },
     {
       id: 14,
+      letter: '🎉',
       src: 'assets/gallery/chief_3_vision.jpg',
       cat: 'vision',
       title: 'The Strategic Visionary',
@@ -1687,14 +1701,19 @@ function initMomentsGallery() {
     currentFilteredList.forEach((item, index) => {
       const card = document.createElement('div');
       card.className = 'gallery-card';
+      card.id = `gallery-card-${item.id}`;
       card.dataset.index = index;
       card.innerHTML = `
         <div class="gallery-card-img-wrap">
           <span class="gallery-card-badge">${item.tag}</span>
+          <div class="gallery-card-letter-seal" title="Celebration Letter: ${item.letter}">
+            <span>${item.letter}</span>
+          </div>
           <img class="gallery-card-img" src="${item.src}" alt="${item.title}" loading="lazy">
           <div class="gallery-card-overlay"></div>
         </div>
         <div class="gallery-card-info">
+          <div class="gallery-card-letter-tag">Letter: <strong>${item.letter}</strong></div>
           <h3 class="gallery-card-title">${item.title}</h3>
           <p class="gallery-card-desc">${item.desc}</p>
         </div>
@@ -1718,6 +1737,21 @@ function initMomentsGallery() {
     });
   });
 
+  // Letter Ribbon characters click handler
+  const ribbonChars = document.querySelectorAll('.ribbon-char');
+  ribbonChars.forEach(char => {
+    char.addEventListener('click', () => {
+      const idx = parseInt(char.getAttribute('data-idx'), 10);
+      const allBtn = document.querySelector('.gallery-filter-btn[data-cat="all"]');
+      if (allBtn && !allBtn.classList.contains('active')) {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        allBtn.classList.add('active');
+        renderCards('all');
+      }
+      openLightbox(idx);
+    });
+  });
+
   // Lightbox functionality
   const lightbox = document.getElementById('gallery-lightbox');
   const lightboxImg = document.getElementById('lightbox-img');
@@ -1732,7 +1766,7 @@ function initMomentsGallery() {
     currentLightboxIdx = index;
     const item = currentFilteredList[currentLightboxIdx];
     lightboxImg.src = item.src;
-    lightboxCaption.textContent = `${item.title} — ${item.tag}`;
+    lightboxCaption.textContent = `[${item.letter}] ${item.title} — ${item.tag}`;
     lightbox.style.display = 'flex';
     document.body.style.overflow = 'hidden';
   }
