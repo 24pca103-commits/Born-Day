@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy Birthday Seilesh Kumaar Sir | CEO, Ixly Technologies</title>
+  
+  <!-- Favicon / Meta -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👑</text></svg>">
+  <meta name="description" content="A special birthday tribute website honoring Mr. Seilesh Kumaar, CEO & Founder of Ixly Technologies, celebrating on November 4.">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Canvas Confetti Library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+
+  <!-- Ambient Light Effects -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  <div class="ambient-glow glow-3"></div>
+
+  <!-- Twinkling Starfield Background -->
+  <canvas id="canvas-stars"></canvas>
+
+  <!-- Top Announcement Ribbon -->
+  <div class="top-announcement-bar">
+    <span>👑</span>
+    <span>IXLY TECHNOLOGIES PROUDLY CELEBRATES • NOVEMBER 4 SPECIAL TRIBUTE • HAPPY BIRTHDAY CHIEF!</span>
+    <span>🚀</span>
+  </div>
+
+  <!-- Navigation Bar -->
+  <nav class="glass-nav">
+    <div class="nav-container">
+      <a href="#" class="logo-wrap">
+        <img src="assets/ixly_logo.png" alt="Ixly Technologies Official Logo" class="company-logo-img">
+        <div>
+          <span style="font-weight: 700; font-size: 1.05rem; letter-spacing: 0.5px; display: block;">Ixly Technologies</span>
+          <span style="font-size: 0.72rem; color: #38bdf8; text-transform: uppercase; letter-spacing: 1px;">Leadership Tribute</span>
+        </div>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#hero">Home</a></li>
+        <li><a href="#chibi-arena">Chibi Squad 🕺</a></li>
+        <li><a href="#cake-ceremony">Cake Ceremony</a></li>
+        <li><a href="#leadership">Leadership</a></li>
+        <li><a href="#wishes">Wishes Board</a></li>
+        <li><a href="#tribute">Tribute</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <button id="toggle-music" class="btn-icon" title="Play Birthday Tune">
+          🎵
+        </button>
+        <button id="global-celebrate-btn" class="btn-primary">
+          <span>🎉</span> Celebrate
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Executive Grand Showcase Hero Section -->
+  <section id="hero" class="hero-showcase">
+    <!-- Center Head Typography -->
+    <div class="hero-center-head">
+      <div class="crown-badge">
+        <span>👑</span> VISIONARY LEADER • MENTOR • CEO
+      </div>
+      
+      <h1 class="hero-showcase-title">
+        Happy Birthday,
+        <span class="ceo-name gold-text">Seilesh Kumaar</span>
+      </h1>
+
+      <p class="hero-showcase-sub">
+        Honoring the driving force and Chief Executive Officer of <strong>Ixly Technologies</strong>. A leader who transforms bold ambitions into technological milestones.
+      </p>
+
+      <div class="hero-quote-pill">
+        “Leading with Vision • Inspiring with Action • Celebrating with Pride”
+      </div>
+    </div>
+
+    <!-- 3-Column Symmetrical Podium Grid -->
+    <div class="podium-grid">
+      
+      <!-- LEFT WING: Strategic Leader Cards -->
+      <div class="wing-column">
+        <div class="podium-card">
+          <div class="card-top-icon icon-purple">💡</div>
+          <h3>Architect of Ixly</h3>
+          <p>Steering Ixly Technologies to international standards through continuous innovation, cutting-edge engineering, and bold vision.</p>
+          <div class="tag-list">
+            <span class="mini-tag">⚡ Tech Pioneer</span>
+            <span class="mini-tag">🌐 Global Growth</span>
+          </div>
+        </div>
+
+        <div class="podium-card">
+          <div class="card-top-icon icon-blue">🤝</div>
+          <h3>People-First Mentor</h3>
+          <p>Nurturing 100+ creative minds, believing in individual potential, and championing a culture where innovation thrives.</p>
+          <div class="tag-list">
+            <span class="mini-tag">❤️ Team Family</span>
+            <span class="mini-tag">🎯 Pure Inspiration</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CENTER: Royal Portal & CEO Spotlight with Jolly Chibis -->
+      <div class="center-podium">
+        <div class="floating-crown">👑</div>
+        
+        <div class="jolly-portrait-wrapper">
+          <div class="portal-glow-orbit"></div>
+          
+          <!-- Neon Doodles echoing the artwork -->
+          <div class="neon-doodle doodle-dream">✨ Dream</div>
+          <div class="neon-doodle doodle-smile">💖 Smile</div>
+          <div class="neon-doodle doodle-happy">🎉 Happy</div>
+          <div class="neon-doodle doodle-magic">🚀 Magic</div>
+
+          <div class="jolly-portrait-card">
+            <img src="assets/ceo_jolly.jpg" alt="Mr. Seilesh Kumaar & Jolly Chibi Avatars - CEO, Ixly Technologies">
+            <div class="portal-gradient-bottom"></div>
+            
+            <div class="portal-nameplate">
+              <div class="name gold-text">SEILESH KUMAAR</div>
+              <div class="sub">Chief Executive Officer • Ixly Technologies</div>
+            </div>
+          </div>
+        </div>
+
+        <button onclick="fullGrandCelebration()" class="btn-gold portal-action-btn" title="Shower Royal Blessings">
+          <span>✨</span> Shower Royal Blessings
+        </button>
+      </div>
+
+      <!-- RIGHT WING: Celebration & Countdown Cards -->
+      <div class="wing-column">
+        <!-- Countdown Card -->
+        <div class="podium-card">
+          <div class="card-top-icon icon-amber">⏳</div>
+          <h3 id="celebration-notice">November 4th Celebration</h3>
+          <p style="margin-bottom: 0.5rem;">Counting down to the grand celebration of our chief visionary:</p>
+          
+          <div class="dial-container">
+            <div class="dial-box">
+              <div class="dial-number" id="count-days">00</div>
+              <div class="dial-unit">Days</div>
+            </div>
+            <div class="dial-box">
+              <div class="dial-number" id="count-hours">00</div>
+              <div class="dial-unit">Hours</div>
+            </div>
+            <div class="dial-box">
+              <div class="dial-number" id="count-mins">00</div>
+              <div class="dial-unit">Mins</div>
+            </div>
+            <div class="dial-box">
+              <div class="dial-number" id="count-secs">00</div>
+              <div class="dial-unit">Secs</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Team Cheers Card -->
+        <div class="podium-card">
+          <div class="card-top-icon icon-cyan">💌</div>
+          <h3>From Ixly Family</h3>
+          <p>Over 380+ cheers and wishes received from Engineering, Design, QA, and HR teams!</p>
+          <div style="display: flex; gap: 8px; margin-top: 6px;">
+            <a href="#wishes" class="btn-outline" style="padding: 7px 14px; font-size: 0.8rem;">
+              <span>👀</span> Read Wishes
+            </a>
+            <button onclick="sounds.playBirthdayMelody(); triggerConfetti(60, 60);" class="btn-outline" style="padding: 7px 14px; font-size: 0.8rem;">
+              <span>🎵</span> Play Tune
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Jolly Chibi Avatar Vibe Actions Interactive Deck -->
+    <div class="jolly-vibes-box">
+      <div class="vibes-title">
+        <span>🎉</span> CLICK CHIBI AVATAR ACTIONS TO PLAY! <span>✨</span>
+      </div>
+      <div class="vibe-buttons-grid">
+        <button class="vibe-btn" data-action="plane" title="Launch Magic Paper Plane">
+          <span class="vibe-icon">✈️</span>
+          <span class="vibe-label">Magic Plane</span>
+        </button>
+        <button class="vibe-btn" data-action="heart" title="Shower Heart Hugs">
+          <span class="vibe-icon">💖</span>
+          <span class="vibe-label">Heart Hug</span>
+        </button>
+        <button class="vibe-btn" data-action="swag" title="Cool Sunglasses Boss Mode">
+          <span class="vibe-icon">🕶️</span>
+          <span class="vibe-label">Swag Boss</span>
+        </button>
+        <button class="vibe-btn" data-action="bubbles" title="Burst of Rainbow Soap Bubbles">
+          <span class="vibe-icon">🫧</span>
+          <span class="vibe-label">Pop Bubbles</span>
+        </button>
+        <button class="vibe-btn" data-action="dream" title="Dream Big & Sparkle Fireworks">
+          <span class="vibe-icon">🌟</span>
+          <span class="vibe-label">Dream Big</span>
+        </button>
+        <button class="vibe-btn" data-action="finger-heart" title="K-Heart Smile Shower">
+          <span class="vibe-icon">🫰</span>
+          <span class="vibe-label">Smile Heart</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Executive Milestone Metrics Strip -->
+    <div class="metrics-strip">
+      <div class="metric-item">
+        <div class="metric-val gold-text">IXLY</div>
+        <div class="metric-lbl">Company</div>
+      </div>
+      <div class="metric-item">
+        <div class="metric-val">SEILESH</div>
+        <div class="metric-lbl">Our CEO & Leader</div>
+      </div>
+      <div class="metric-item">
+        <div class="metric-val" style="color: #38bdf8;">NOV 4</div>
+        <div class="metric-lbl">Birthday Milestone</div>
+      </div>
+      <div class="metric-item">
+        <div class="metric-val" style="color: #f43f5e;">100%</div>
+        <div class="metric-lbl">Team Pride & Love</div>
+      </div>
+      <div class="metric-item">
+        <div class="metric-val" style="color: #10b981;">BEYOND</div>
+        <div class="metric-lbl">Future Horizons</div>
+      </div>
+    </div>
+
+    <!-- Grand Action Bar Deck -->
+    <div class="hero-action-deck">
+      <a href="#cake-ceremony" class="btn-gold" style="font-size: 1.05rem; padding: 13px 28px;">
+        <span>🎂</span> Join Cake Ceremony
+      </a>
+      <a href="#post-wish" class="btn-primary" style="font-size: 1.05rem; padding: 13px 28px;">
+        <span>✍️</span> Drop Your Personal Wish
+      </a>
+      <a href="#tribute" class="btn-outline" style="font-size: 1.05rem; padding: 13px 28px;">
+        <span>📜</span> Read Executive Tribute
+      </a>
+    </div>
+  </section>
+
+  <!-- Seilesh Sir's Chibi Dance & Action Squad Arena -->
+  <section id="chibi-arena" class="chibi-arena-section">
+    <div class="arena-header">
+      <div class="badge-tag">
+        <span>✨</span> 3D CHIBI ACTION ARENA • SEILESH SIR SQUAD
+      </div>
+      <h2>The 6 Chibi Avatar Performers</h2>
+      <p>
+        Watch each miniature 3D avatar from the portrait perform their signature moves! Click on any performer to unleash their dance, music, and special action — or launch the <strong>Squad Dance Party</strong>!
+      </p>
+    </div>
+
+    <!-- Master Squad Party Trigger Button -->
+    <div class="squad-control-bar">
+      <button id="btn-squad-party" class="btn-party-all">
+        <span>🎉</span> LAUNCH SQUAD DANCE PARTY (ALL TOGETHER)! <span>🕺💃</span>
+      </button>
+    </div>
+
+    <!-- 6 Chibi Performer Cards Grid -->
+    <div class="chibi-grid">
+      
+      <!-- Chibi 1: Dream Dancer -->
+      <div class="chibi-card" id="chibi-card-1">
+        <div class="chibi-stage-halo" style="background: radial-gradient(circle, #fbbf24, transparent);"></div>
+        <div class="chibi-canvas-wrap">
+          <canvas id="chibi-canvas-1" class="chibi-canvas"></canvas>
+        </div>
+        <span class="chibi-badge" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3);">
+          🕺 Jump Dance
+        </span>
+        <h3>The Dream Dancer</h3>
+        <div class="chibi-role">Arms Open • High Energy Leap</div>
+        <p>Jumping with boundless excitement, celebrating milestones with high leaps and golden celebration stars!</p>
+        <button class="btn-gold btn-chibi-action" id="btn-chibi-1">
+          <span>🕺</span> Dance & Jump!
+        </button>
+      </div>
+
+      <!-- Chibi 2: Smile Groover -->
+      <div class="chibi-card" id="chibi-card-2">
+        <div class="chibi-stage-halo" style="background: radial-gradient(circle, #06b6d4, transparent);"></div>
+        <div class="chibi-canvas-wrap">
+          <canvas id="chibi-canvas-2" class="chibi-canvas"></canvas>
+        </div>
+        <span class="chibi-badge" style="background: rgba(6, 182, 212, 0.15); color: #22d3ee; border: 1px solid rgba(6, 182, 212, 0.3);">
+          🫰 K-Heart Wave
+        </span>
+        <h3>The Smile Groover</h3>
+        <div class="chibi-role">Bubble Floater • Finger-Heart</div>
+        <p>Gently floating atop an iridescent soap bubble, swaying to dreamy chimes and sending finger-heart love.</p>
+        <button class="btn-primary btn-chibi-action" id="btn-chibi-2">
+          <span>🫧</span> Float & Send Heart!
+        </button>
+      </div>
+
+      <!-- Chibi 3: Action Rockstar -->
+      <div class="chibi-card" id="chibi-card-3">
+        <div class="chibi-stage-halo" style="background: radial-gradient(circle, #a855f7, transparent);"></div>
+        <div class="chibi-canvas-wrap">
+          <canvas id="chibi-canvas-3" class="chibi-canvas"></canvas>
+        </div>
+        <span class="chibi-badge" style="background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3);">
+          🎸 Power Action
+        </span>
+        <h3>The Action Rockstar</h3>
+        <div class="chibi-role">Hero Point • Distorted Riffs</div>
+        <p>Rhythmic headbanging with lightning sparks, pointing with unwavering confidence: "You are the champion!"</p>
+        <button class="btn-primary btn-chibi-action" id="btn-chibi-3" style="background: linear-gradient(135deg, #a855f7, #6366f1);">
+          <span>🎸</span> Shred Rockstar Riff!
+        </button>
+      </div>
+
+      <!-- Chibi 4: Heart Hugger -->
+      <div class="chibi-card" id="chibi-card-4">
+        <div class="chibi-stage-halo" style="background: radial-gradient(circle, #ec4899, transparent);"></div>
+        <div class="chibi-canvas-wrap">
+          <canvas id="chibi-canvas-4" class="chibi-canvas"></canvas>
+        </div>
+        <span class="chibi-badge" style="background: rgba(236, 72, 153, 0.15); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.3);">
+          💖 Warm Hug
+        </span>
+        <h3>The Heart Hugger</h3>
+        <div class="chibi-role">Empathic Sway • Heartbeat Glow</div>
+        <p>Hugging the giant glowing pink heart, swaying gently to sweet harp melodies and radiating warmth to the team.</p>
+        <button class="btn-primary btn-chibi-action" id="btn-chibi-4" style="background: linear-gradient(135deg, #ec4899, #f43f5e);">
+          <span>💖</span> Warm Heart Sway!
+        </button>
+      </div>
+
+      <!-- Chibi 5: Lo-Fi Thinker -->
+      <div class="chibi-card" id="chibi-card-5">
+        <div class="chibi-stage-halo" style="background: radial-gradient(circle, #10b981, transparent);"></div>
+        <div class="chibi-canvas-wrap">
+          <canvas id="chibi-canvas-5" class="chibi-canvas"></canvas>
+        </div>
+        <span class="chibi-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">
+          💡 Brainstorm
+        </span>
+        <h3>The Lo-Fi Thinker</h3>
+        <div class="chibi-role">Smart Ideas • Chill Head-Nod</div>
+        <p>Resting chin on hand, nodding calmly to lo-fi Rhodes chords, generating groundbreaking architectural concepts.</p>
+        <button class="btn-primary btn-chibi-action" id="btn-chibi-5" style="background: linear-gradient(135deg, #10b981, #059669);">
+          <span>💡</span> Spark Smart Idea!
+        </button>
+      </div>
+
+      <!-- Chibi 6: Swag Aviator DJ -->
+      <div class="chibi-card" id="chibi-card-6">
+        <div class="chibi-stage-halo" style="background: radial-gradient(circle, #f59e0b, transparent);"></div>
+        <div class="chibi-canvas-wrap">
+          <canvas id="chibi-canvas-6" class="chibi-canvas"></canvas>
+        </div>
+        <span class="chibi-badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);">
+          ✈️ Swag Flight
+        </span>
+        <h3>The Swag Aviator DJ</h3>
+        <div class="chibi-role">Sunglasses • Paper Plane Loop</div>
+        <p>Laying back in dark sunglasses on a paper airplane, dropping funky basslines while swooping through the clouds!</p>
+        <button class="btn-gold btn-chibi-action" id="btn-chibi-6">
+          <span>🕶️</span> Sonic Plane Flight!
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Interactive Birthday Cake Cutting Ceremony -->
+  <section id="cake-ceremony" class="cake-section">
+    <div class="cake-wrapper">
+      <div class="cake-stage">
+        <div class="cake-container">
+          <!-- 4 Candles (Signifying November 4) -->
+          <div class="candle-row">
+            <div class="candle">
+              <div class="flame"></div>
+              <div class="smoke"></div>
+            </div>
+            <div class="candle">
+              <div class="flame"></div>
+              <div class="smoke"></div>
+            </div>
+            <div class="candle">
+              <div class="flame"></div>
+              <div class="smoke"></div>
+            </div>
+            <div class="candle">
+              <div class="flame"></div>
+              <div class="smoke"></div>
+            </div>
+          </div>
+
+          <!-- Top Layer -->
+          <div class="cake-top-layer">
+            <div class="frosting-drips"></div>
+          </div>
+
+          <!-- Bottom Layer -->
+          <div class="cake-bottom-layer"></div>
+
+          <!-- Cake Plate -->
+          <div class="cake-plate"></div>
+        </div>
+      </div>
+
+      <div class="cake-controls">
+        <div class="cake-status-badge">
+          <span>✨</span> INTERACTIVE CELEBRATION
+        </div>
+        <h3>Make A Birthday Wish!</h3>
+        <p id="cake-status">
+          Candles are lit and the cake is set! Click below to blow the candles and cut the cake with the entire Ixly team!
+        </p>
+
+        <div class="cake-btn-group">
+          <button id="btn-blow-candles" class="btn-gold">
+            <span>💨</span> Blow Candles
+          </button>
+          <button id="btn-cut-cake" class="btn-primary" style="display: none;">
+            <span>🍰</span> Cut The Cake!
+          </button>
+          <button id="btn-relight" class="btn-outline" style="display: none;">
+            <span>🔄</span> Relight
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Leadership Pillars Section -->
+  <section id="leadership" class="pillars-section">
+    <div class="section-head">
+      <span class="section-tag">Executive Pillars</span>
+      <h2>The Qualities That Inspire Ixly</h2>
+      <p>Under your guidance, Ixly Technologies has grown into a hub of engineering mastery, creativity, and purposeful impact.</p>
+    </div>
+
+    <div class="pillars-grid">
+      <div class="pillar-card">
+        <div class="pillar-icon-wrap icon-purple">💡</div>
+        <h3>Visionary Outlook</h3>
+        <p>Always staying ahead of industry curves, identifying future tech opportunities, and giving Ixly the strategic edge to lead.</p>
+      </div>
+
+      <div class="pillar-card">
+        <div class="pillar-icon-wrap icon-blue">🤝</div>
+        <h3>People-First Mentorship</h3>
+        <p>Believing in every team member's unique potential, providing guidance, and fostering an environment of continuous growth.</p>
+      </div>
+
+      <div class="pillar-card">
+        <div class="pillar-icon-wrap icon-amber">⚡</div>
+        <h3>Unstoppable Passion</h3>
+        <p>Your relentless energy and drive inspire the entire workplace to aim higher and craft work we take immense pride in.</p>
+      </div>
+
+      <div class="pillar-card">
+        <div class="pillar-icon-wrap icon-cyan">🎯</div>
+        <h3>Commitment to Excellence</h3>
+        <p>Delivering world-class technology solutions with unwavering focus on quality, reliability, and client success.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Team Wishes Board Section -->
+  <section id="wishes" class="wishes-section">
+    <div class="section-head">
+      <span class="section-tag">Team Wall of Wishes</span>
+      <h2>Greetings From The Ixly Family</h2>
+      <p>Heartfelt messages, gratitude, and cheers from your colleagues and team members across every department.</p>
+    </div>
+
+    <!-- Filter Pills (Custom 4 Ixly Teams) -->
+    <div class="wishes-top-bar">
+      <div class="filter-pills">
+        <button class="filter-btn active" data-filter="all">All Wishes</button>
+        <button class="filter-btn" data-filter="dev">Developer Team 💻</button>
+        <button class="filter-btn" data-filter="manager">Manager Team 📊</button>
+        <button class="filter-btn" data-filter="hr">HR Team 🤝</button>
+        <button class="filter-btn" data-filter="client">Client Team 🌐</button>
+      </div>
+
+      <a href="#post-wish" class="btn-primary" style="padding: 8px 18px; font-size: 0.9rem;">
+        <span>✍️</span> Add Your Wish
+      </a>
+    </div>
+
+    <!-- Container for Wish Cards -->
+    <div id="wishes-container" class="wishes-grid"></div>
+
+    <!-- Form to Add a Wish -->
+    <div id="post-wish" class="post-wish-box">
+      <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; text-align: center;">
+        Drop Your Personal Birthday Wish 💌
+      </h3>
+      <p style="color: var(--text-muted); font-size: 0.95rem; text-align: center; margin-bottom: 2rem;">
+        Write a memorable birthday wish for Seilesh Sir. It will be immediately posted on the team board!
+      </p>
+
+      <form id="wish-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="wish-name">Your Full Name *</label>
+            <input type="text" id="wish-name" class="form-control" placeholder="e.g. Ramesh Kumar" required>
+          </div>
+          <div class="form-group">
+            <label for="wish-role">Your Role / Title</label>
+            <input type="text" id="wish-role" class="form-control" placeholder="e.g. Senior Software Engineer">
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="wish-dept">Department / Team</label>
+            <select id="wish-dept" class="form-control">
+              <option value="dev">Developer Team</option>
+              <option value="manager">Manager Team</option>
+              <option value="hr">HR Team</option>
+              <option value="client">Client Team</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Pick a Reaction Sticker</label>
+            <div class="emoji-selector">
+              <span class="emoji-opt selected" data-emoji="🎂">🎂</span>
+              <span class="emoji-opt" data-emoji="👑">👑</span>
+              <span class="emoji-opt" data-emoji="🚀">🚀</span>
+              <span class="emoji-opt" data-emoji="🔥">🔥</span>
+              <span class="emoji-opt" data-emoji="❤️">❤️</span>
+            </div>
+            <input type="hidden" id="selected-emoji" value="🎂">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.75rem;">
+          <label for="wish-text">Your Birthday Message for Seilesh Sir *</label>
+          <textarea id="wish-text" class="form-control" placeholder="Wishing you a very Happy Birthday Sir! May your year ahead be full of..." required></textarea>
+        </div>
+
+        <div style="text-align: center;">
+          <button type="submit" class="btn-gold" style="width: 100%; justify-content: center; font-size: 1.05rem;">
+            <span>🚀</span> Post Birthday Wish
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Executive Tribute Letter Section -->
+  <section id="tribute" class="tribute-section">
+    <div class="tribute-card">
+      <div class="quote-mark">“</div>
+      <p>
+        "A truly remarkable leader does not merely tell you where to go; they walk alongside you, kindle your confidence, and demonstrate what can be accomplished when passion meets purpose. Thank you, Seilesh Sir, for making Ixly Technologies a workplace of pride, innovation, and boundless camaraderie."
+      </p>
+      <div class="tribute-signature">— Dedicated With Immense Respect & Love</div>
+      <div class="tribute-company">From The Developer Team, Manager Team, HR Team & Client Team at Ixly Technologies</div>
+    </div>
+  </section>
+
+  <!-- Floating Cheer Blaster Button -->
+  <div class="cheer-blaster">
+    <button id="cheer-button" class="cheer-pill" title="Click to shower love!">
+      <span>👑</span>
+      <span>Cheer Boss (<span id="cheer-count">384</span>)</span>
+    </button>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <img src="assets/ixly_logo.png" alt="Ixly Technologies Official Logo" class="footer-logo-img">
+      <div class="footer-logo">IXLY TECHNOLOGIES</div>
+      <p class="footer-text">
+        Designed & celebrated with pride by the <strong>Developer Team, Manager Team, HR Team, and Client Team</strong> for our CEO, <strong>Mr. Seilesh Kumaar</strong> on his special day — November 4th.
+      </p>
+      <div style="font-size: 0.8rem; color: #64748b;">
+        © 2026 Ixly Technologies. All Rights Reserved. Crafted with ❤️ for our Leader.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Script -->
+  <script src="script.js"></script>
+</body>
+</html>
