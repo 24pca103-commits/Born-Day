@@ -1934,6 +1934,10 @@ nav {
   flex-shrink: 0;
 }
 
+.wish-sender-info {
+  flex-grow: 1;
+}
+
 .wish-sender-info h4 {
   font-size: 1rem;
   font-weight: 700;
@@ -1943,6 +1947,35 @@ nav {
   font-size: 0.75rem;
   color: #38bdf8;
   font-weight: 500;
+}
+
+.btn-delete-wish {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.btn-delete-wish:hover {
+  background: rgba(239, 68, 68, 0.35);
+  border-color: #ef4444;
+  color: #ffffff;
+  transform: scale(1.1);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+}
+
+.btn-delete-wish:active {
+  transform: scale(0.92);
 }
 
 .wish-body {

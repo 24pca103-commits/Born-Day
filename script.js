@@ -688,6 +688,9 @@ function initWishesBoard() {
               <h4>${escapeHTML(w.name)}</h4>
               <span>${escapeHTML(w.role || 'Ixly Team Member')}</span>
             </div>
+            <button type="button" class="btn-delete-wish" data-id="${w.id}" title="Remove this wish" aria-label="Remove this wish">
+              🗑️
+            </button>
           </div>
           <div class="wish-body">
             "${escapeHTML(w.message)}"
@@ -702,6 +705,24 @@ function initWishesBoard() {
         </div>
       `;
       grid.appendChild(card);
+    });
+
+    // Attach delete wish events
+    grid.querySelectorAll('.btn-delete-wish').forEach(delBtn => {
+      delBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = parseInt(delBtn.getAttribute('data-id'), 10);
+        const wishToDelete = storedWishes.find(item => item.id === id);
+        const namePreview = wishToDelete ? `from "${wishToDelete.name}"` : '';
+
+        if (confirm(`Remove this birthday wish ${namePreview}?`)) {
+          storedWishes = storedWishes.filter(item => item.id !== id);
+          localStorage.setItem('ixly_ceo_wishes_v5', JSON.stringify(storedWishes));
+          sounds.playPop();
+          render(currentFilter);
+          showToast("🗑️ Wish removed successfully!");
+        }
+      });
     });
 
     // Attach like events
