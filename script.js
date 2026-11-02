@@ -1113,30 +1113,24 @@ function initVibeActions() {
 
       if (action === 'plane') {
         launchMagicPlane("Magic Flight with Seilesh Sir! ✈️");
-        showToast("✈️ Paper airplane taking flight with Chief!");
       } else if (action === 'heart') {
         sounds.playHeartTwinkle();
         spawnHeartExplosion();
-        showToast("💖 Sending heart hugs to our CEO!");
       } else if (action === 'bubbles') {
         sounds.playBubblePop();
         for (let i = 0; i < 10; i++) {
           setTimeout(createSingleBubble, i * 150);
         }
-        showToast("🫧 Rainbow soap bubbles flurry!");
       } else if (action === 'dream') {
         sounds.playCheerChime();
         triggerConfetti(80, 80);
-        showToast("🌟 Dream Big & Reach New Heights with Ixly!");
       } else if (action === 'finger-heart') {
         sounds.playHeartTwinkle();
         spawnEmojiShower('🫰');
-        showToast("🫰 Sending finger-hearts from Ixly Team!");
       } else if (action === 'swag') {
         sounds.playPop();
         launchMagicPlane("Boss Mode Activated! 🕶️🔥");
         spawnEmojiShower('🕶️');
-        showToast("🕶️ Swag Boss Mode: 100% Cool!");
       }
     });
   });
@@ -1413,52 +1407,68 @@ function initMusicAutoplay() {
   bgMusic.src = 'assets/bg_music.mp3';
   bgMusic.loop = true;
   bgMusic.volume = 0.95;
+  bgMusic.muted = false;
   bgMusic.setAttribute('playsinline', '');
   bgMusic.setAttribute('autoplay', '');
 
-  let hasStarted = false;
+  let isAudioPlaying = false;
 
-  const startAudioPlayback = () => {
-    if (hasStarted && !bgMusic.paused) return;
+  const tryPlayUnmuted = () => {
+    if (isAudioPlaying && !bgMusic.paused && !bgMusic.muted) return;
 
     sounds.init();
+    if (sounds.ctx && sounds.ctx.state === 'suspended') {
+      sounds.ctx.resume().catch(() => {});
+    }
+
+    bgMusic.muted = false;
+    bgMusic.volume = 0.95;
+
     const playPromise = bgMusic.play();
     if (playPromise !== undefined) {
       playPromise.then(() => {
-        hasStarted = true;
-        bgMusic.muted = false;
+        isAudioPlaying = true;
+        cleanupGestureListeners();
       }).catch(() => {
-        // If browser blocks unmuted sound before any touch, start muted first so it is already running
-        bgMusic.muted = true;
-        bgMusic.play().then(() => {
-          hasStarted = true;
-        }).catch(() => {});
+        isAudioPlaying = false;
       });
     }
   };
 
-  // 1. Immediate play on site open
-  startAudioPlayback();
-  document.addEventListener('DOMContentLoaded', startAudioPlayback);
-  window.addEventListener('load', startAudioPlayback);
-  window.addEventListener('pageshow', startAudioPlayback);
-  window.addEventListener('focus', startAudioPlayback);
+  const gestureEvents = [
+    'touchstart', 'touchend', 'touchmove', 'scroll',
+    'pointerdown', 'pointermove', 'pointerup',
+    'click', 'mousedown', 'mouseup', 'mousemove',
+    'wheel', 'keydown', 'orientationchange', 'visibilitychange', 'pageshow', 'focus'
+  ];
 
-  // 2. Unmute and start full audio seamlessly on ANY natural screen touch, swipe, or scroll
-  const onAnyNaturalGesture = () => {
-    bgMusic.muted = false;
-    startAudioPlayback();
-    if (!bgMusic.paused && !bgMusic.muted) {
-      ['touchstart', 'touchend', 'touchmove', 'scroll', 'pointerdown', 'pointermove', 'click', 'wheel', 'keydown'].forEach(evt => {
-        window.removeEventListener(evt, onAnyNaturalGesture, true);
-        document.removeEventListener(evt, onAnyNaturalGesture, true);
-      });
-    }
+  const onUserActivity = () => {
+    tryPlayUnmuted();
   };
 
-  ['touchstart', 'touchend', 'touchmove', 'scroll', 'pointerdown', 'pointermove', 'click', 'wheel', 'keydown'].forEach(evt => {
-    window.addEventListener(evt, onAnyNaturalGesture, { passive: true, capture: true });
-    document.addEventListener(evt, onAnyNaturalGesture, { passive: true, capture: true });
+  const cleanupGestureListeners = () => {
+    gestureEvents.forEach(evt => {
+      window.removeEventListener(evt, onUserActivity, true);
+      document.removeEventListener(evt, onUserActivity, true);
+    });
+  };
+
+  // 1. Immediate unmuted play attempts on page load / ready / before any user touch
+  tryPlayUnmuted();
+  document.addEventListener('DOMContentLoaded', tryPlayUnmuted);
+  window.addEventListener('load', tryPlayUnmuted);
+  window.addEventListener('pageshow', tryPlayUnmuted);
+  window.addEventListener('focus', tryPlayUnmuted);
+
+  // Staggered retries for browsers that need initial rendering to complete
+  setTimeout(tryPlayUnmuted, 150);
+  setTimeout(tryPlayUnmuted, 600);
+  setTimeout(tryPlayUnmuted, 1500);
+
+  // 2. Instant unlock on any micro-interaction (scroll, touch, swipe, pointer)
+  gestureEvents.forEach(evt => {
+    window.addEventListener(evt, onUserActivity, { passive: true, capture: true });
+    document.addEventListener(evt, onUserActivity, { passive: true, capture: true });
   });
 }
 
