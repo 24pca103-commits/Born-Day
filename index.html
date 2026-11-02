@@ -50,6 +50,7 @@
         <li><a href="#chibi-arena">Chibi Squad 🕺</a></li>
         <li><a href="#cake-ceremony">Cake Ceremony</a></li>
         <li><a href="#leadership">Leadership</a></li>
+        <li><a href="#gallery">Moments 📸</a></li>
         <li><a href="#wishes">Wishes Board</a></li>
         <li><a href="#tribute">Tribute</a></li>
       </ul>
@@ -71,6 +72,7 @@
       <a href="#chibi-arena" class="mobile-nav-link">🕺 Chibi Squad</a>
       <a href="#cake-ceremony" class="mobile-nav-link">🎂 Cake Ceremony</a>
       <a href="#leadership" class="mobile-nav-link">💡 Leadership</a>
+      <a href="#gallery" class="mobile-nav-link">📸 Moments Gallery</a>
       <a href="#wishes" class="mobile-nav-link">💌 Wishes Board</a>
       <a href="#tribute" class="mobile-nav-link">📜 Tribute</a>
     </div>
@@ -544,6 +546,41 @@
       </div>
     </div>
   </section>
+
+  <!-- Moments of Excellence & Adventure Gallery Section -->
+  <section id="gallery" class="gallery-section">
+    <div class="section-title">
+      <span class="gold-sub">LEADERSHIP JOURNEY & MEMORIES</span>
+      <h2>Moments of Excellence & Adventure 📸</h2>
+      <p>A glimpse into Chief Seilesh Kumaar's inspiring journey — from soaring global milestones to fearless heights!</p>
+    </div>
+
+    <!-- Gallery Category Filters -->
+    <div class="gallery-filters">
+      <button class="gallery-filter-btn active" data-cat="all">🌟 All Moments (14)</button>
+      <button class="gallery-filter-btn" data-cat="adventure">🪂 Skydiving & Heights (5)</button>
+      <button class="gallery-filter-btn" data-cat="global">🌍 Global Footprint (3)</button>
+      <button class="gallery-filter-btn" data-cat="family">❤️ Heart & Life (3)</button>
+      <button class="gallery-filter-btn" data-cat="vision">👑 Leadership & Focus (3)</button>
+    </div>
+
+    <!-- Gallery Grid -->
+    <div class="gallery-grid" id="moments-gallery-grid"></div>
+  </section>
+
+  <!-- Photo Lightbox Modal -->
+  <div id="gallery-lightbox" class="gallery-lightbox-modal" style="display: none;">
+    <div class="lightbox-backdrop"></div>
+    <div class="lightbox-dialog">
+      <button type="button" class="lightbox-close-btn" id="lightbox-close" aria-label="Close photo preview">✕</button>
+      <button type="button" class="lightbox-nav-btn prev" id="lightbox-prev" aria-label="Previous photo">‹</button>
+      <div class="lightbox-image-wrap">
+        <img id="lightbox-img" src="" alt="Chief Seilesh Kumaar Moment">
+        <div class="lightbox-caption" id="lightbox-caption"></div>
+      </div>
+      <button type="button" class="lightbox-nav-btn next" id="lightbox-next" aria-label="Next photo">›</button>
+    </div>
+  </div>
 
   <!-- Team Wishes Board Section -->
   <section id="wishes" class="wishes-section">

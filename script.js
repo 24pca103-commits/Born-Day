@@ -1545,6 +1545,223 @@ function initMobileNav() {
   });
 }
 
+// --- Moments of Excellence & Adventure Gallery Controller ---
+function initMomentsGallery() {
+  const galleryGrid = document.getElementById('moments-gallery-grid');
+  if (!galleryGrid) return;
+
+  const moments = [
+    {
+      id: 1,
+      src: 'assets/gallery/chief_14_skydiving_palm_dubai.jpg',
+      cat: 'adventure',
+      title: 'Palm Jumeirah Flight, Dubai',
+      tag: 'Skydiving 🪂',
+      desc: 'Fearless aerial glide soaring above the iconic Palm Jumeirah in Dubai — fearless visionary leadership.'
+    },
+    {
+      id: 2,
+      src: 'assets/gallery/chief_13_skydiving_freefall.jpg',
+      cat: 'adventure',
+      title: 'Fearless Freefall 13,000ft',
+      tag: 'Pure Adrenaline ⚡',
+      desc: 'High-altitude adrenaline rush pushing beyond all boundaries and living life to the fullest.'
+    },
+    {
+      id: 3,
+      src: 'assets/gallery/chief_12_skydiving_ground.jpg',
+      cat: 'adventure',
+      title: 'Sky Mission Ready',
+      tag: 'Pre-Flight 🛩️',
+      desc: 'Gearing up for the skies with determination, passion, and a fearless spirit.'
+    },
+    {
+      id: 4,
+      src: 'assets/gallery/chief_4_mountains.jpg',
+      cat: 'adventure',
+      title: 'Alpine Mountain Camp',
+      tag: 'Mountain Adventure 🏔️',
+      desc: 'Conquering peaks, rugged outdoor trails, and embracing nature\'s grandest vistas.'
+    },
+    {
+      id: 5,
+      src: 'assets/gallery/chief_5_cycle.jpg',
+      cat: 'adventure',
+      title: 'Endurance & Vitality',
+      tag: 'Fitness & Drive 🚴',
+      desc: 'Cycling through endurance routes with high energy, discipline, and active fitness.'
+    },
+    {
+      id: 6,
+      src: 'assets/gallery/chief_10_tower_bridge.jpg',
+      cat: 'global',
+      title: 'Iconic Tower Bridge, London',
+      tag: 'Global Traveler 🇬🇧',
+      desc: 'Standing tall before London’s historic Tower Bridge — a global citizen shaping global vision.'
+    },
+    {
+      id: 7,
+      src: 'assets/gallery/chief_9_canary_wharf.jpg',
+      cat: 'global',
+      title: 'Canary Wharf Financial Hub',
+      tag: 'Global Business 🏙️',
+      desc: 'At the heart of London’s futuristic financial district, steering tech and international ventures.'
+    },
+    {
+      id: 8,
+      src: 'assets/gallery/chief_11_london_street.jpg',
+      cat: 'global',
+      title: 'Regent Street, London',
+      tag: 'London Stride 🚶',
+      desc: 'Effortless elegance walking the vibrant streets of London.'
+    },
+    {
+      id: 9,
+      src: 'assets/gallery/chief_8_family_baby.jpg',
+      cat: 'family',
+      title: 'Lifting Pure Joy',
+      tag: 'Father\'s Love ❤️',
+      desc: 'A heartwarming fatherhood moment filled with boundless warmth, smiles, and unconditional love.'
+    },
+    {
+      id: 10,
+      src: 'assets/gallery/chief_7_family_cafe.jpg',
+      cat: 'family',
+      title: 'Tender Bonding Moments',
+      tag: 'Family Time ☕',
+      desc: 'Sharing sweet, calm conversations and precious quality moments with family.'
+    },
+    {
+      id: 11,
+      src: 'assets/gallery/chief_6_heritage.jpg',
+      cat: 'family',
+      title: 'Roots & Heritage',
+      tag: 'Tradition & Grace 🚪',
+      desc: 'Rooted in tradition, values, and humility beside the timeless carved heritage entryway.'
+    },
+    {
+      id: 12,
+      src: 'assets/gallery/chief_1_profile.jpg',
+      cat: 'vision',
+      title: 'The Signature Profile',
+      tag: 'Iconic Focus 👑',
+      desc: 'A sharp, visionary executive profile representing focus, ambition, and sharp leadership.'
+    },
+    {
+      id: 13,
+      src: 'assets/gallery/chief_2_smile.jpg',
+      cat: 'vision',
+      title: 'Warmth & Radiance',
+      tag: 'Inspiring Smile ✨',
+      desc: 'Warm, approachable, and charismatic smile that inspires every team member at Ixly Technologies.'
+    },
+    {
+      id: 14,
+      src: 'assets/gallery/chief_3_vision.jpg',
+      cat: 'vision',
+      title: 'The Strategic Visionary',
+      tag: 'Thought Leadership 💡',
+      desc: 'Contemplating the next big leap — thoughtful strategist, entrepreneur, and mentor.'
+    }
+  ];
+
+  let currentFilteredList = [...moments];
+  let currentLightboxIdx = 0;
+
+  function renderCards(filterCat = 'all') {
+    galleryGrid.innerHTML = '';
+    currentFilteredList = filterCat === 'all' 
+      ? moments 
+      : moments.filter(m => m.cat === filterCat);
+
+    currentFilteredList.forEach((item, index) => {
+      const card = document.createElement('div');
+      card.className = 'gallery-card';
+      card.dataset.index = index;
+      card.innerHTML = `
+        <div class="gallery-card-img-wrap">
+          <span class="gallery-card-badge">${item.tag}</span>
+          <img class="gallery-card-img" src="${item.src}" alt="${item.title}" loading="lazy">
+          <div class="gallery-card-overlay"></div>
+        </div>
+        <div class="gallery-card-info">
+          <h3 class="gallery-card-title">${item.title}</h3>
+          <p class="gallery-card-desc">${item.desc}</p>
+        </div>
+      `;
+
+      card.addEventListener('click', () => {
+        openLightbox(index);
+      });
+
+      galleryGrid.appendChild(card);
+    });
+  }
+
+  // Filter Buttons
+  const filterBtns = document.querySelectorAll('.gallery-filter-btn');
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderCards(btn.dataset.cat);
+    });
+  });
+
+  // Lightbox functionality
+  const lightbox = document.getElementById('gallery-lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
+  const lightboxCaption = document.getElementById('lightbox-caption');
+  const closeBtn = document.getElementById('lightbox-close');
+  const prevBtn = document.getElementById('lightbox-prev');
+  const nextBtn = document.getElementById('lightbox-next');
+  const backdrop = lightbox ? lightbox.querySelector('.lightbox-backdrop') : null;
+
+  function openLightbox(index) {
+    if (!lightbox || !currentFilteredList[index]) return;
+    currentLightboxIdx = index;
+    const item = currentFilteredList[currentLightboxIdx];
+    lightboxImg.src = item.src;
+    lightboxCaption.textContent = `${item.title} — ${item.tag}`;
+    lightbox.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    if (!lightbox) return;
+    lightbox.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  function showNext() {
+    if (currentFilteredList.length === 0) return;
+    currentLightboxIdx = (currentLightboxIdx + 1) % currentFilteredList.length;
+    openLightbox(currentLightboxIdx);
+  }
+
+  function showPrev() {
+    if (currentFilteredList.length === 0) return;
+    currentLightboxIdx = (currentLightboxIdx - 1 + currentFilteredList.length) % currentFilteredList.length;
+    openLightbox(currentLightboxIdx);
+  }
+
+  if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
+  if (backdrop) backdrop.addEventListener('click', closeLightbox);
+  if (prevBtn) prevBtn.addEventListener('click', (e) => { e.stopPropagation(); showPrev(); });
+  if (nextBtn) nextBtn.addEventListener('click', (e) => { e.stopPropagation(); showNext(); });
+
+  document.addEventListener('keydown', (e) => {
+    if (lightbox && lightbox.style.display === 'flex') {
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowRight') showNext();
+      if (e.key === 'ArrowLeft') showPrev();
+    }
+  });
+
+  // Initial render
+  renderCards('all');
+}
+
 // --- DOM Ready Hook ---
 document.addEventListener('DOMContentLoaded', () => {
   initStars();
@@ -1554,6 +1771,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initVibeActions();
   initChibiSquad();
   initCakeCeremony();
+  initMomentsGallery();
   initWishesBoard();
   initCheerBlaster();
   initCelebrationControls();
