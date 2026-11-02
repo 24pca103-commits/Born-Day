@@ -592,32 +592,114 @@ function initWishesBoard() {
 
   // --- Shared Backend Wishes System ---
   let storedWishes = JSON.parse(localStorage.getItem('ixly_ceo_wishes_v5')) || [];
+  let isSyncingNewWish = false;
 
-  // Function to sync wishes from central server so EVERY phone & laptop sees them in real-time
-  async function fetchSharedWishes() {
+  const CLOUD_BIN_URL = 'https://extendsclass.com/api/json-storage/bin/ebeefbc';
+
+  async function getRemoteWishes() {
+    // 1. Try local or Vercel serverless /api/wishes
     try {
       const res = await fetch('/api/wishes', { cache: 'no-store' });
       if (res.ok) {
-        const remoteWishes = await res.json();
-        if (Array.isArray(remoteWishes)) {
-          // If server is empty but local has wishes, upload local wishes to server
-          if (remoteWishes.length === 0 && storedWishes.length > 0) {
-            for (const localWish of storedWishes) {
-              await fetch('/api/wishes', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(localWish)
-              }).catch(() => {});
-            }
+        const data = await res.json();
+        if (Array.isArray(data)) return data;
+      }
+    } catch (e) {}
+
+    // 2. Direct fallback to Cloud Storage
+    try {
+      const res = await fetch(CLOUD_BIN_URL, { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) return data;
+      }
+    } catch (e) {}
+
+    return null;
+  }
+
+  async function syncWishesToRemote(wishesList) {
+    let saved = false;
+    // 1. Try /api/wishes
+    try {
+      const res = await fetch('/api/wishes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(wishesList)
+      });
+      if (res.ok) saved = true;
+    } catch (e) {}
+
+    // 2. Direct fallback to Cloud Storage
+    try {
+      await fetch(CLOUD_BIN_URL, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(wishesList)
+      });
+      saved = true;
+    } catch (e) {}
+
+    return saved;
+  }
+
+  // Function to sync wishes from central server so EVERY phone & laptop sees them in real-time
+  async function fetchSharedWishes() {
+    if (isSyncingNewWish) return;
+
+    try {
+      const remoteWishes = await getRemoteWishes();
+      if (!remoteWishes || !Array.isArray(remoteWishes)) return;
+
+      if (isSyncingNewWish) return;
+
+      // If remote has no wishes but local has wishes, upload local wishes to cloud
+      if (remoteWishes.length === 0 && storedWishes.length > 0) {
+        await syncWishesToRemote(storedWishes);
+        render(currentFilter);
+        return;
+      }
+
+      // Merge logic: Combine local + remote wishes by unique ID
+      const wishMap = new Map();
+
+      // First add remote wishes
+      remoteWishes.forEach(w => {
+        if (w && w.id) wishMap.set(String(w.id), w);
+      });
+
+      // Next check local wishes: if local has a wish not on remote, keep it
+      let hasLocalOnly = false;
+      storedWishes.forEach(localW => {
+        if (localW && localW.id) {
+          const key = String(localW.id);
+          if (!wishMap.has(key)) {
+            wishMap.set(key, localW);
+            hasLocalOnly = true;
           } else {
-            storedWishes = remoteWishes;
-            localStorage.setItem('ixly_ceo_wishes_v5', JSON.stringify(storedWishes));
-            render(currentFilter);
+            // Keep whichever has higher likes
+            const remoteW = wishMap.get(key);
+            remoteW.likes = Math.max(remoteW.likes || 0, localW.likes || 0);
           }
         }
+      });
+
+      const mergedList = Array.from(wishMap.values()).sort((a, b) => {
+        const timeA = new Date(a.createdAt || a.id).getTime() || 0;
+        const timeB = new Date(b.createdAt || b.id).getTime() || 0;
+        return timeB - timeA;
+      });
+
+      // If there were local wishes missing from server, upload merged list so other devices see them
+      if (hasLocalOnly) {
+        await syncWishesToRemote(mergedList);
       }
+
+      storedWishes = mergedList;
+      localStorage.setItem('ixly_ceo_wishes_v5', JSON.stringify(storedWishes));
+      render(currentFilter);
     } catch (e) {
-      // Fallback gracefully to offline localStorage
+      console.log('Sync note:', e);
     }
   }
 
@@ -770,20 +852,14 @@ function initWishesBoard() {
         const namePreview = wishToDelete ? `from "${wishToDelete.name}"` : '';
 
         if (confirm(`Remove this birthday wish ${namePreview}?`)) {
-          storedWishes = storedWishes.filter(item => item.id !== id);
+          storedWishes = storedWishes.filter(item => String(item.id) !== String(id));
           localStorage.setItem('ixly_ceo_wishes_v5', JSON.stringify(storedWishes));
           sounds.playPop();
           render(currentFilter);
           showToast("🗑️ Wish removed successfully!");
 
-          // Delete from shared server database
-          fetch(`/api/wishes/${id}`, { method: 'DELETE' }).catch(() => {
-            fetch('/api/wishes/delete', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ id })
-            }).catch(e => console.log('Delete sync error:', e));
-          });
+          // Delete from shared cloud / server
+          syncWishesToRemote(storedWishes);
         }
       });
     });
@@ -792,7 +868,7 @@ function initWishesBoard() {
     grid.querySelectorAll('.like-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         sounds.playPop();
-        const id = parseInt(btn.getAttribute('data-id'));
+        const id = parseInt(btn.getAttribute('data-id'), 10);
         const targetWish = storedWishes.find(item => item.id === id);
         if (targetWish) {
           const isLiking = !btn.classList.contains('liked');
@@ -800,18 +876,14 @@ function initWishesBoard() {
             targetWish.likes++;
             btn.classList.add('liked');
           } else {
-            targetWish.likes--;
+            targetWish.likes = Math.max(0, targetWish.likes - 1);
             btn.classList.remove('liked');
           }
           btn.querySelector('.like-count').innerText = targetWish.likes;
           localStorage.setItem('ixly_ceo_wishes_v5', JSON.stringify(storedWishes));
 
-          // Sync like count with server
-          fetch('/api/wishes/like', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id, liked: isLiking })
-          }).catch(e => console.log('Like sync error:', e));
+          // Sync like count with shared cloud / server
+          syncWishesToRemote(storedWishes);
         }
       });
     });
@@ -875,8 +947,11 @@ function initWishesBoard() {
         badge: deptBadges[department] || '✨ Ixly Family',
         emoji: emoji,
         message: message,
-        likes: 1
+        likes: 1,
+        createdAt: new Date().toISOString()
       };
+
+      isSyncingNewWish = true;
 
       storedWishes.unshift(newWish);
       localStorage.setItem('ixly_ceo_wishes_v5', JSON.stringify(storedWishes));
@@ -889,18 +964,30 @@ function initWishesBoard() {
       });
       render('all');
 
-      // Post to shared server so EVERY phone and laptop sees this wish
-      fetch('/api/wishes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newWish)
-      }).then(() => {
-        fetchSharedWishes();
+      // Post to shared server and cloud so EVERY phone and laptop sees this wish
+      syncWishesToRemote(storedWishes).then(() => {
+        setTimeout(() => {
+          isSyncingNewWish = false;
+          fetchSharedWishes();
+        }, 1500);
       }).catch(err => {
         console.error('Failed to post wish to server:', err);
+        setTimeout(() => {
+          isSyncingNewWish = false;
+        }, 1500);
       });
 
       form.reset();
+
+      // Restore emoji selector default state after form.reset()
+      emojiBtns.forEach(o => o.classList.remove('selected'));
+      if (emojiBtns[0]) {
+        emojiBtns[0].classList.add('selected');
+        if (selectedEmojiInput) {
+          selectedEmojiInput.value = emojiBtns[0].getAttribute('data-emoji') || '🎂';
+        }
+      }
+
       closeWishModal();
       triggerConfetti(70, 70);
       sounds.playCheerChime();
@@ -1461,9 +1548,9 @@ function initMusicAutoplay() {
   window.addEventListener('focus', tryPlayUnmuted);
 
   // Staggered retries for browsers that need initial rendering to complete
-  setTimeout(tryPlayUnmuted, 150);
-  setTimeout(tryPlayUnmuted, 600);
-  setTimeout(tryPlayUnmuted, 1500);
+  [50, 150, 350, 700, 1200, 2000, 3000].forEach(ms => {
+    setTimeout(tryPlayUnmuted, ms);
+  });
 
   // 2. Instant unlock on any micro-interaction (scroll, touch, swipe, pointer)
   gestureEvents.forEach(evt => {
