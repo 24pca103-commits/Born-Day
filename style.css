@@ -623,7 +623,7 @@ nav {
 
 .magic-paper-plane.active {
   opacity: 1;
-  animation: flyAcross 4.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  animation: flyAcross 9.5s cubic-bezier(0.35, 0.1, 0.25, 1) forwards;
 }
 
 .plane-body {
@@ -648,21 +648,28 @@ nav {
 @keyframes flyAcross {
   0% {
     top: 65%;
-    left: -200px;
-    transform: rotate(15deg) scale(0.7);
+    left: -280px;
+    transform: rotate(14deg) scale(0.75);
+    opacity: 0;
   }
-  40% {
-    top: 35%;
-    transform: rotate(-5deg) scale(1.1);
+  6% {
+    opacity: 1;
   }
-  80% {
-    top: 20%;
-    transform: rotate(8deg) scale(0.95);
+  35% {
+    top: 40%;
+    transform: rotate(-4deg) scale(1.05);
+  }
+  70% {
+    top: 25%;
+    transform: rotate(5deg) scale(1);
+  }
+  92% {
+    opacity: 1;
   }
   100% {
-    top: 10%;
-    left: 105vw;
-    transform: rotate(-10deg) scale(0.8);
+    top: 12%;
+    left: calc(100vw + 60px);
+    transform: rotate(-6deg) scale(0.85);
     opacity: 0;
   }
 }

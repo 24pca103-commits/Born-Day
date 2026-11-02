@@ -968,7 +968,7 @@ function launchMagicPlane(bannerText = "Happy Birthday Seilesh Sir! 🚀") {
 
   setTimeout(() => {
     plane.classList.remove('active');
-  }, 4500);
+  }, 9800);
 }
 
 // --- 3D Interactive Portrait Tilt ---
