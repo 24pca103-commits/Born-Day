@@ -36,11 +36,7 @@
   <nav class="glass-nav">
     <div class="nav-container">
       <a href="#" class="logo-wrap">
-        <img src="assets/ixly_logo.png" alt="Ixly Technologies Official Logo" class="company-logo-img">
-        <div>
-          <span style="font-weight: 700; font-size: 1.05rem; letter-spacing: 0.5px; display: block;">Ixly Technologies</span>
-          <span style="font-size: 0.72rem; color: #38bdf8; text-transform: uppercase; letter-spacing: 1px;">Leadership Tribute</span>
-        </div>
+        <img src="assets/ixly_logo.png?v=2" alt="Ixly Technologies Official Logo" class="company-logo-img">
       </a>
 
       <ul class="nav-links">
@@ -57,9 +53,23 @@
           🎵
         </button>
         <button id="global-celebrate-btn" class="btn-primary">
-          <span>🎉</span> Celebrate
+          <span>🎉</span> <span class="celebrate-text">Celebrate</span>
+        </button>
+        <!-- Mobile Menu Toggle Button -->
+        <button id="mobile-menu-btn" class="btn-icon mobile-only" aria-label="Toggle Navigation Menu">
+          ☰
         </button>
       </div>
+    </div>
+
+    <!-- Mobile Nav Drawer -->
+    <div id="mobile-menu" class="mobile-nav-drawer" style="display: none;">
+      <a href="#hero" class="mobile-nav-link">🏠 Home</a>
+      <a href="#chibi-arena" class="mobile-nav-link">🕺 Chibi Squad</a>
+      <a href="#cake-ceremony" class="mobile-nav-link">🎂 Cake Ceremony</a>
+      <a href="#leadership" class="mobile-nav-link">💡 Leadership</a>
+      <a href="#wishes" class="mobile-nav-link">💌 Wishes Board</a>
+      <a href="#tribute" class="mobile-nav-link">📜 Tribute</a>
     </div>
   </nav>
 
@@ -117,12 +127,6 @@
         
         <div class="jolly-portrait-wrapper">
           <div class="portal-glow-orbit"></div>
-          
-          <!-- Neon Doodles echoing the artwork -->
-          <div class="neon-doodle doodle-dream">✨ Dream</div>
-          <div class="neon-doodle doodle-smile">💖 Smile</div>
-          <div class="neon-doodle doodle-happy">🎉 Happy</div>
-          <div class="neon-doodle doodle-magic">🚀 Magic</div>
 
           <div class="jolly-portrait-card">
             <img src="assets/ceo_jolly.jpg" alt="Mr. Seilesh Kumaar & Jolly Chibi Avatars - CEO, Ixly Technologies">
@@ -248,9 +252,9 @@
       <a href="#cake-ceremony" class="btn-gold" style="font-size: 1.05rem; padding: 13px 28px;">
         <span>🎂</span> Join Cake Ceremony
       </a>
-      <a href="#post-wish" class="btn-primary" style="font-size: 1.05rem; padding: 13px 28px;">
+      <button type="button" id="btn-open-wish-modal-hero" class="btn-primary" style="font-size: 1.05rem; padding: 13px 28px;">
         <span>✍️</span> Drop Your Personal Wish
-      </a>
+      </button>
       <a href="#tribute" class="btn-outline" style="font-size: 1.05rem; padding: 13px 28px;">
         <span>📜</span> Read Executive Tribute
       </a>
@@ -388,36 +392,90 @@
   <section id="cake-ceremony" class="cake-section">
     <div class="cake-wrapper">
       <div class="cake-stage">
-        <div class="cake-container">
+        <div class="cake-container" id="cake-interactive-container">
+          
+          <!-- Slicing Knife Animation -->
+          <div class="celebration-knife" id="celebration-knife">
+            <svg width="55" height="135" viewBox="0 0 55 135" fill="none">
+              <!-- Golden Hilt with Celebration Ribbon -->
+              <rect x="23" y="8" width="10" height="38" rx="4" fill="#d97706"/>
+              <rect x="17" y="46" width="22" height="7" rx="3" fill="#f59e0b"/>
+              <circle cx="28" cy="27" r="4" fill="#ef4444"/>
+              <!-- Stainless Steel Blade -->
+              <path d="M23 53 L33 53 L33 118 Q33 132 28 135 Q23 132 23 118 Z" fill="url(#knifeBladeGrad)"/>
+              <path d="M28 53 L33 53 L33 118 Q33 132 28 135 Z" fill="rgba(255,255,255,0.45)"/>
+              <defs>
+                <linearGradient id="knifeBladeGrad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#94a3b8"/>
+                  <stop offset="50%" stop-color="#ffffff"/>
+                  <stop offset="100%" stop-color="#cbd5e1"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+
           <!-- 4 Candles (Signifying November 4) -->
           <div class="candle-row">
-            <div class="candle">
+            <div class="candle candle-1">
               <div class="flame"></div>
               <div class="smoke"></div>
             </div>
-            <div class="candle">
+            <div class="candle candle-2">
               <div class="flame"></div>
               <div class="smoke"></div>
             </div>
-            <div class="candle">
+            <div class="candle candle-3">
               <div class="flame"></div>
               <div class="smoke"></div>
             </div>
-            <div class="candle">
+            <div class="candle candle-4">
               <div class="flame"></div>
               <div class="smoke"></div>
             </div>
           </div>
 
-          <!-- Top Layer -->
-          <div class="cake-top-layer">
-            <div class="frosting-drips"></div>
+          <!-- Main Grand Birthday Cake (Whole Intact Cake - Only Top Tier Cuts) -->
+          <div class="cake-main-body" id="cake-main-body">
+            <!-- Top Tier (The slice is cut exclusively from here!) -->
+            <div class="cake-tier cake-tier-top">
+              <div class="frosting-crown">
+                <span class="frosting-piping"></span>
+                <span class="frosting-piping"></span>
+                <span class="frosting-piping"></span>
+                <span class="frosting-piping"></span>
+                <span class="frosting-piping"></span>
+              </div>
+              <div class="frosting-drips"></div>
+
+              <!-- Cut Wedge Slot (reveals inner sponge & cream when top tier slice is cut) -->
+              <div class="cake-wedge-cut top-wedge-cut">
+                <div class="sponge-layer layer-1"></div>
+                <div class="cream-layer"></div>
+                <div class="sponge-layer layer-2"></div>
+              </div>
+            </div>
+
+            <!-- Bottom Tier (Remains 100% solid and uncut) -->
+            <div class="cake-tier cake-tier-bottom">
+              <div class="frosting-ribbon-gold"></div>
+              <div class="frosting-drips bottom-drips"></div>
+            </div>
           </div>
 
-          <!-- Bottom Layer -->
-          <div class="cake-bottom-layer"></div>
+          <!-- Served Single Small Cake Slice on Dessert Plate -->
+          <div class="served-cake-dish" id="served-cake-dish">
+            <div class="fresh-cake-slice">
+              <span class="slice-berry">🍓</span>
+              <div class="slice-frosting"></div>
+              <div class="slice-sponge top-sponge"></div>
+              <div class="slice-cream"></div>
+              <div class="slice-sponge bottom-sponge"></div>
+            </div>
+            <div class="dessert-plate"></div>
+            <div class="slice-badge">For Seilesh Sir 🍰</div>
+          </div>
 
-          <!-- Cake Plate -->
+          <!-- Cake Plate Serving Tray -->
           <div class="cake-plate"></div>
         </div>
       </div>
@@ -439,7 +497,7 @@
             <span>🍰</span> Cut The Cake!
           </button>
           <button id="btn-relight" class="btn-outline" style="display: none;">
-            <span>🔄</span> Relight
+            <span>🔄</span> Relight & Reset Cake
           </button>
         </div>
       </div>
@@ -499,22 +557,29 @@
         <button class="filter-btn" data-filter="client">Client Team 🌐</button>
       </div>
 
-      <a href="#post-wish" class="btn-primary" style="padding: 8px 18px; font-size: 0.9rem;">
+      <button type="button" id="btn-open-wish-modal" class="btn-primary" style="padding: 9px 20px; font-size: 0.95rem;">
         <span>✍️</span> Add Your Wish
-      </a>
+      </button>
     </div>
 
     <!-- Container for Wish Cards -->
     <div id="wishes-container" class="wishes-grid"></div>
+  </section>
 
-    <!-- Form to Add a Wish -->
-    <div id="post-wish" class="post-wish-box">
-      <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; text-align: center;">
-        Drop Your Personal Birthday Wish 💌
-      </h3>
-      <p style="color: var(--text-muted); font-size: 0.95rem; text-align: center; margin-bottom: 2rem;">
-        Write a memorable birthday wish for Seilesh Sir. It will be immediately posted on the team board!
-      </p>
+  <!-- Interactive Birthday Wish Popup Modal -->
+  <div id="wish-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-dialog glass-card">
+      <button type="button" class="modal-close-btn" id="modal-close-btn" aria-label="Close Modal">&times;</button>
+      
+      <div style="text-align: center; margin-bottom: 1.5rem;">
+        <span style="font-size: 2.2rem; display: block; margin-bottom: 6px;">💌</span>
+        <h3 style="font-size: 1.6rem; font-weight: 800; margin-bottom: 0.35rem;">
+          Drop Your Birthday Wish
+        </h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; max-width: 440px; margin: 0 auto;">
+          Write your personal greetings for Seilesh Sir. It will be posted directly onto the Ixly Wall!
+        </p>
+      </div>
 
       <form id="wish-form">
         <div class="form-grid">
@@ -552,19 +617,19 @@
           </div>
         </div>
 
-        <div class="form-group" style="margin-bottom: 1.75rem;">
+        <div class="form-group" style="margin-bottom: 1.5rem;">
           <label for="wish-text">Your Birthday Message for Seilesh Sir *</label>
           <textarea id="wish-text" class="form-control" placeholder="Wishing you a very Happy Birthday Sir! May your year ahead be full of..." required></textarea>
         </div>
 
         <div style="text-align: center;">
-          <button type="submit" class="btn-gold" style="width: 100%; justify-content: center; font-size: 1.05rem;">
+          <button type="submit" class="btn-gold" style="width: 100%; justify-content: center; font-size: 1.05rem; padding: 12px 24px;">
             <span>🚀</span> Post Birthday Wish
           </button>
         </div>
       </form>
     </div>
-  </section>
+  </div>
 
   <!-- Executive Tribute Letter Section -->
   <section id="tribute" class="tribute-section">
@@ -589,8 +654,8 @@
   <!-- Footer -->
   <footer>
     <div class="footer-content">
-      <img src="assets/ixly_logo.png" alt="Ixly Technologies Official Logo" class="footer-logo-img">
-      <div class="footer-logo">IXLY TECHNOLOGIES</div>
+      <img src="assets/ixly_logo.png?v=2" alt="Ixly Technologies Official Logo" class="footer-logo-img">
+      <div class="footer-logo" style="color: #76b82a;">IXLY TECHNOLOGIES</div>
       <p class="footer-text">
         Designed & celebrated with pride by the <strong>Developer Team, Manager Team, HR Team, and Client Team</strong> for our CEO, <strong>Mr. Seilesh Kumaar</strong> on his special day — November 4th.
       </p>

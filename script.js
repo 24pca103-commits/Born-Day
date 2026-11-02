@@ -248,6 +248,41 @@ class SoundSystem {
       }, item.delay);
     });
   }
+
+  playKnifeSlice() {
+    if (this.muted) return;
+    this.init();
+    try {
+      // Swish / slice whoosh sound
+      const bufferSize = this.ctx.sampleRate * 0.35;
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = buffer;
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'highpass';
+      filter.frequency.setValueAtTime(1400, this.ctx.currentTime);
+      filter.frequency.exponentialRampToValueAtTime(350, this.ctx.currentTime + 0.3);
+
+      const gain = this.ctx.createGain();
+      gain.gain.setValueAtTime(0.28, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.32);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.ctx.destination);
+      noise.start();
+
+      // Sharp metallic ding / slice shimmer
+      setTimeout(() => {
+        this.playTone(1800, 'triangle', 0.18, 0.12);
+        this.playTone(2400, 'sine', 0.22, 0.08);
+      }, 70);
+    } catch (e) {}
+  }
 }
 
 const sounds = new SoundSystem();
@@ -410,6 +445,8 @@ function initCakeCeremony() {
   const flames = document.querySelectorAll('.flame');
   const smokes = document.querySelectorAll('.smoke');
   const statusEl = document.getElementById('cake-status');
+  const cakeContainer = document.getElementById('cake-interactive-container');
+  const knifeEl = document.getElementById('celebration-knife');
 
   if (!blowBtn) return;
 
@@ -432,12 +469,30 @@ function initCakeCeremony() {
 
   if (cutBtn) {
     cutBtn.addEventListener('click', () => {
-      sounds.playCheerChime();
-      triggerConfetti(120, 100);
-      if (statusEl) {
-        statusEl.innerHTML = "🎂 <strong>Cake cut!</strong> Wishing you a joyous, prosperous, and monumental year, Seilesh Sir!";
+      // 1. Play realistic knife slicing sound
+      sounds.playKnifeSlice();
+
+      // 2. Trigger knife slice downward animation
+      if (knifeEl) {
+        knifeEl.classList.remove('slicing');
+        void knifeEl.offsetWidth; // trigger reflow
+        knifeEl.classList.add('slicing');
       }
-      fullGrandCelebration();
+
+      // 3. At apex of knife cut, physically separate cake halves & serve delicious slice
+      setTimeout(() => {
+        if (cakeContainer) {
+          cakeContainer.classList.add('is-cut');
+        }
+        sounds.playCheerChime();
+        triggerConfetti(140, 100);
+
+        if (statusEl) {
+          statusEl.innerHTML = "🍰 <strong>Freshly cut for Seilesh Sir!</strong> The sweetest slice has been served! Wishing our visionary CEO boundless joy, stellar health, and unprecedented success!";
+        }
+
+        fullGrandCelebration();
+      }, 380);
     });
   }
 
@@ -445,6 +500,8 @@ function initCakeCeremony() {
     resetBtn.addEventListener('click', () => {
       flames.forEach(f => f.classList.remove('extinguished'));
       smokes.forEach(s => s.classList.remove('active'));
+      if (cakeContainer) cakeContainer.classList.remove('is-cut');
+      if (knifeEl) knifeEl.classList.remove('slicing');
       blowBtn.style.display = 'inline-flex';
       if (cutBtn) cutBtn.style.display = 'none';
       resetBtn.style.display = 'none';
@@ -498,80 +555,8 @@ function initCheerBlaster() {
 }
 
 // --- Team Wishes Data & Board (Tailored to Ixly: Developer, Manager, HR, Client Teams) ---
-const defaultWishes = [
-  {
-    id: 1,
-    name: "Developer Team",
-    role: "Frontend, Backend & Mobile Engineers",
-    department: "dev",
-    avatarBg: "linear-gradient(135deg, #6366f1, #3b82f6)",
-    initials: "DEV",
-    badge: "💻 Developer Team",
-    emoji: "🚀",
-    message: "Happy Birthday, Seilesh Sir! Thank you for trusting our code, guiding our tech architecture, and inspiring us to push technological boundaries every single day. Wishing you zero production bugs, infinite breakthroughs, and a year packed with remarkable achievements at Ixly!",
-    likes: 68
-  },
-  {
-    id: 2,
-    name: "Manager Team",
-    role: "Project Managers & Delivery Leads",
-    department: "manager",
-    avatarBg: "linear-gradient(135deg, #f59e0b, #d97706)",
-    initials: "MGT",
-    badge: "📊 Manager Team",
-    emoji: "🏆",
-    message: "Happy Birthday, Seilesh Kumaar Sir! Leading projects under your visionary direction is an absolute privilege. Your strategic foresight, calm composure in crunch moments, and belief in our execution empower us to deliver on-time excellence every sprint!",
-    likes: 61
-  },
-  {
-    id: 3,
-    name: "HR Team",
-    role: "People & Culture Operations",
-    department: "hr",
-    avatarBg: "linear-gradient(135deg, #10b981, #059669)",
-    initials: "HR",
-    badge: "🤝 HR Team",
-    emoji: "👑",
-    message: "A very Happy Birthday to the heart and soul of Ixly Technologies! Thank you, Seilesh Sir, for creating a vibrant workplace where every voice matters, every talent finds room to grow, and our entire office feels like one united family. Wishing you boundless health and joy!",
-    likes: 75
-  },
-  {
-    id: 4,
-    name: "Client Team",
-    role: "Client Servicing & Account Management",
-    department: "client",
-    avatarBg: "linear-gradient(135deg, #06b6d4, #0284c7)",
-    initials: "CLT",
-    badge: "🌐 Client Team",
-    emoji: "🤝",
-    message: "Happy Birthday, Seilesh Sir! Our clients love partnering with Ixly Technologies because of the trust, integrity, and top-tier technological value you inspire us to deliver. Proud to represent your visionary leadership across all global partnerships!",
-    likes: 54
-  },
-  {
-    id: 5,
-    name: "Core Engineering Guild",
-    role: "Full-Stack Devs & Tech Leads",
-    department: "dev",
-    avatarBg: "linear-gradient(135deg, #8b5cf6, #7c3aed)",
-    initials: "DEV",
-    badge: "⚡ Developer Team",
-    emoji: "🔥",
-    message: "Wishing our chief architect a monumental birthday! Your passion for cutting-edge architecture keeps our engines revved. Here's to scaling Ixly Technologies to international tech heights!",
-    likes: 59
-  },
-  {
-    id: 6,
-    name: "Client Relations & Growth",
-    role: "Business Relations & Growth Leads",
-    department: "client",
-    avatarBg: "linear-gradient(135deg, #ec4899, #f43f5e)",
-    initials: "CLT",
-    badge: "📈 Client Team",
-    emoji: "✨",
-    message: "A grand Happy Birthday to our CEO! Under your guidance, client satisfaction and company reputation reach new pinnacles every single quarter. Looking forward to celebrating many more milestones together!",
-    likes: 49
-  }
-];
+// Default mock wishes cleared per user request so team members can post real wishes directly!
+const defaultWishes = [];
 
 function initWishesBoard() {
   const grid = document.getElementById('wishes-container');
@@ -580,15 +565,61 @@ function initWishesBoard() {
   const emojiBtns = document.querySelectorAll('.emoji-opt');
   const selectedEmojiInput = document.getElementById('selected-emoji');
 
-  // Load from localStorage or default
-  let storedWishes = JSON.parse(localStorage.getItem('ixly_ceo_wishes_v3'));
-  if (!storedWishes || !storedWishes.length) {
-    storedWishes = defaultWishes;
-    localStorage.setItem('ixly_ceo_wishes_v3', JSON.stringify(storedWishes));
+  // Modal dialog elements
+  const wishModal = document.getElementById('wish-modal');
+  const openModalBtn = document.getElementById('btn-open-wish-modal');
+  const openModalHeroBtn = document.getElementById('btn-open-wish-modal-hero');
+  const closeModalBtn = document.getElementById('modal-close-btn');
+
+  // Load from localStorage (v5 ensures clean fresh board without old mock wishes)
+  let storedWishes = JSON.parse(localStorage.getItem('ixly_ceo_wishes_v5'));
+  if (!storedWishes) {
+    storedWishes = [];
+    localStorage.setItem('ixly_ceo_wishes_v5', JSON.stringify(storedWishes));
   }
 
   let currentFilter = 'all';
 
+  // --- Modal Open & Close Logic ---
+  function openWishModal() {
+    if (!wishModal) return;
+    wishModal.style.display = 'flex';
+    requestAnimationFrame(() => {
+      wishModal.classList.add('open');
+    });
+    document.body.style.overflow = 'hidden';
+    const firstInput = document.getElementById('wish-name');
+    if (firstInput) setTimeout(() => firstInput.focus(), 120);
+  }
+
+  function closeWishModal() {
+    if (!wishModal) return;
+    wishModal.classList.remove('open');
+    setTimeout(() => {
+      wishModal.style.display = 'none';
+    }, 280);
+    document.body.style.overflow = '';
+  }
+
+  if (openModalBtn) openModalBtn.addEventListener('click', openWishModal);
+  if (openModalHeroBtn) openModalHeroBtn.addEventListener('click', openWishModal);
+  if (closeModalBtn) closeModalBtn.addEventListener('click', closeWishModal);
+
+  if (wishModal) {
+    wishModal.addEventListener('click', (e) => {
+      if (e.target === wishModal) {
+        closeWishModal();
+      }
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && wishModal && wishModal.classList.contains('open')) {
+      closeWishModal();
+    }
+  });
+
+  // --- Render Wishes Grid & Empty State ---
   function render(filter = 'all') {
     if (!grid) return;
     grid.innerHTML = '';
@@ -596,6 +627,34 @@ function initWishesBoard() {
     const list = filter === 'all' 
       ? storedWishes 
       : storedWishes.filter(w => w.department === filter);
+
+    if (list.length === 0) {
+      const deptNames = {
+        all: "the Ixly Technologies family",
+        dev: "Developer Team 💻",
+        manager: "Manager Team 📊",
+        hr: "HR Team 🤝",
+        client: "Client Team 🌐"
+      };
+      const deptLabel = deptNames[filter] || "Ixly Technologies";
+
+      grid.innerHTML = `
+        <div class="wishes-empty-box glass-card" style="grid-column: 1 / -1;">
+          <span class="empty-icon">💌</span>
+          <h3>No Wishes Posted Yet for ${deptLabel}</h3>
+          <p>Be the very first from the Ixly Technologies family to send your birthday blessing to Seilesh Sir!</p>
+          <button type="button" class="btn-gold" id="btn-empty-add-wish" style="margin-top: 1.25rem;">
+            <span>✍️</span> Drop The First Wish
+          </button>
+        </div>
+      `;
+
+      const emptyAddBtn = document.getElementById('btn-empty-add-wish');
+      if (emptyAddBtn) {
+        emptyAddBtn.addEventListener('click', openWishModal);
+      }
+      return;
+    }
 
     list.forEach(w => {
       const card = document.createElement('div');
@@ -627,7 +686,7 @@ function initWishesBoard() {
     });
 
     // Attach like events
-    document.querySelectorAll('.like-btn').forEach(btn => {
+    grid.querySelectorAll('.like-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         sounds.playPop();
         const id = parseInt(btn.getAttribute('data-id'));
@@ -641,7 +700,7 @@ function initWishesBoard() {
             btn.classList.remove('liked');
           }
           btn.querySelector('.like-count').innerText = targetWish.likes;
-          localStorage.setItem('ixly_ceo_wishes_v3', JSON.stringify(storedWishes));
+          localStorage.setItem('ixly_ceo_wishes_v5', JSON.stringify(storedWishes));
         }
       });
     });
@@ -688,6 +747,13 @@ function initWishesBoard() {
         'linear-gradient(135deg, #ec4899, #a855f7)'
       ];
 
+      const deptBadges = {
+        dev: '💻 Developer Team',
+        manager: '📊 Manager Team',
+        hr: '🤝 HR Team',
+        client: '🌐 Client Team'
+      };
+
       const newWish = {
         id: Date.now(),
         name: name,
@@ -695,18 +761,19 @@ function initWishesBoard() {
         department: department,
         avatarBg: randomGradients[Math.floor(Math.random() * randomGradients.length)],
         initials: name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase(),
-        badge: '✨ Direct Wish',
+        badge: deptBadges[department] || '✨ Ixly Family',
         emoji: emoji,
         message: message,
         likes: 1
       };
 
       storedWishes.unshift(newWish);
-      localStorage.setItem('ixly_ceo_wishes_v3', JSON.stringify(storedWishes));
+      localStorage.setItem('ixly_ceo_wishes_v5', JSON.stringify(storedWishes));
       render(currentFilter);
 
       form.reset();
-      triggerConfetti(60, 60);
+      closeWishModal();
+      triggerConfetti(70, 70);
       sounds.playCheerChime();
 
       // Notification toast
@@ -1244,6 +1311,32 @@ function initCelebrationControls() {
   }, 35000);
 }
 
+// --- Mobile Navigation Drawer Controller ---
+function initMobileNav() {
+  const mobileBtn = document.getElementById('mobile-menu-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+  if (!mobileBtn || !mobileMenu) return;
+
+  mobileBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isVisible = mobileMenu.style.display === 'flex';
+    mobileMenu.style.display = isVisible ? 'none' : 'flex';
+  });
+
+  const links = mobileMenu.querySelectorAll('.mobile-nav-link');
+  links.forEach(link => {
+    link.addEventListener('click', () => {
+      mobileMenu.style.display = 'none';
+    });
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!mobileMenu.contains(e.target) && e.target !== mobileBtn) {
+      mobileMenu.style.display = 'none';
+    }
+  });
+}
+
 // --- DOM Ready Hook ---
 document.addEventListener('DOMContentLoaded', () => {
   initStars();
@@ -1256,4 +1349,5 @@ document.addEventListener('DOMContentLoaded', () => {
   initWishesBoard();
   initCheerBlaster();
   initCelebrationControls();
+  initMobileNav();
 });

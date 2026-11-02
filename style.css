@@ -19,6 +19,11 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  caret-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 html {
@@ -32,6 +37,37 @@ body {
   overflow-x: hidden;
   min-height: 100vh;
   position: relative;
+  cursor: default;
+}
+
+/* Allow typing and blinking cursor EXCLUSIVELY inside input & textarea fields */
+input,
+textarea,
+select,
+[contenteditable="true"] {
+  caret-color: #f59e0b !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  cursor: text !important;
+}
+
+button,
+a,
+.btn-gold,
+.btn-primary,
+.btn-outline,
+.btn-icon,
+.vibe-btn,
+.filter-btn,
+.emoji-opt,
+.chibi-card,
+.podium-card,
+.modal-close-btn,
+.like-btn,
+.cheer-pill {
+  cursor: pointer !important;
+  user-select: none !important;
 }
 
 /* Background Ambient Lighting */
@@ -162,14 +198,14 @@ nav {
 }
 
 .company-logo-img {
-  height: 42px;
+  height: 44px;
   width: auto;
   object-fit: contain;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 2px 6px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  background: transparent;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.6));
   transition: transform 0.25s ease;
 }
 
@@ -177,16 +213,26 @@ nav {
   transform: scale(1.06);
 }
 
+.brand-company-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 800;
+  font-size: 1.15rem;
+  letter-spacing: 0.5px;
+  display: block;
+  color: #76b82a;
+  text-shadow: 0 0 15px rgba(118, 184, 42, 0.45);
+}
+
 .footer-logo-img {
-  height: 52px;
+  height: 56px;
   width: auto;
   object-fit: contain;
-  margin-bottom: 1rem;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 4px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  margin-bottom: 0.75rem;
+  background: transparent;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+  filter: drop-shadow(0 4px 15px rgba(0, 0, 0, 0.6));
 }
 
 .brand-badge {
@@ -749,14 +795,17 @@ nav {
 
 .portal-glow-orbit {
   position: absolute;
-  width: 380px;
-  height: 490px;
+  width: calc(100% + 28px);
+  height: calc(100% + 28px);
+  top: -14px;
+  left: -14px;
   border-radius: 36px;
   background: conic-gradient(from 180deg, #f59e0b, #ec4899, #06b6d4, #6366f1, #f59e0b);
-  filter: blur(24px);
+  filter: blur(22px);
   opacity: 0.65;
   animation: rotateGlow 14s linear infinite;
   z-index: 1;
+  pointer-events: none;
 }
 
 .portal-gradient-bottom {
@@ -845,17 +894,6 @@ nav {
 @keyframes popParticleFade {
   0% { transform: scale(0.8) translate(0, 0); opacity: 1; }
   100% { transform: scale(1.4) translate(var(--tx, 20px), var(--ty, -20px)); opacity: 0; }
-}
-
-/* Media query updates */
-@media (max-width: 768px) {
-  .vibe-buttons-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  .jolly-portrait-wrapper {
-    width: 290px;
-    height: 385px;
-  }
 }
 
 
@@ -948,7 +986,7 @@ nav {
 /* 6-Card Performer Grid */
 .chibi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
   gap: 2rem;
 }
 
@@ -1311,19 +1349,70 @@ nav {
 /* SVG / CSS Cake Styling */
 .cake-container {
   position: relative;
-  width: 260px;
-  height: 200px;
+  width: 290px;
+  height: 240px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
 }
 
+/* Slicing Knife Animation - Targets strictly the Top Tier */
+.celebration-knife {
+  position: absolute;
+  top: -85px;
+  right: 56px;
+  transform: rotate(20deg);
+  z-index: 30;
+  opacity: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 15px rgba(0, 0, 0, 0.7));
+}
+
+.celebration-knife.slicing {
+  animation: knifeCutMotion 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes knifeCutMotion {
+  0% {
+    top: -85px;
+    right: 68px;
+    transform: rotate(24deg) scale(0.9);
+    opacity: 1;
+  }
+  35% {
+    top: -10px;
+    right: 58px;
+    transform: rotate(10deg) scale(1.05);
+    opacity: 1;
+  }
+  65% {
+    top: 38px;
+    right: 52px;
+    transform: rotate(2deg) scale(1);
+    opacity: 1;
+    filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.9));
+  }
+  85% {
+    top: 56px;
+    right: 50px;
+    transform: rotate(-2deg) scale(1);
+    opacity: 1;
+  }
+  100% {
+    top: 62px;
+    right: 50px;
+    transform: rotate(-2deg) scale(0.85);
+    opacity: 0;
+  }
+}
+
 .candle-row {
   display: flex;
-  gap: 24px;
+  gap: 22px;
   margin-bottom: -5px;
-  z-index: 5;
+  z-index: 10;
+  transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .candle {
@@ -1339,6 +1428,12 @@ nav {
   );
   border-radius: 4px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: transform 0.8s ease;
+}
+
+/* Whole cake stays intact - candles do not split apart */
+.cake-container.is-cut .candle {
+  transform: none;
 }
 
 .flame {
@@ -1389,40 +1484,212 @@ nav {
   100% { opacity: 0; transform: translateX(-50%) translateY(-40px) scale(3); }
 }
 
-/* Cake Layers */
-.cake-top-layer {
-  width: 180px;
-  height: 60px;
+/* Royal Unified Cake (Whole intact cake - Not split in half!) */
+.cake-main-body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  z-index: 5;
+  transition: transform 0.5s ease;
+}
+
+.cake-tier {
+  position: relative;
+  box-shadow: inset 0 8px 14px rgba(255, 255, 255, 0.3), 0 10px 25px rgba(0, 0, 0, 0.35);
+  transition: all 0.4s ease;
+}
+
+.cake-tier-top {
+  width: 195px;
+  height: 62px;
   background: linear-gradient(135deg, #ec4899, #be185d);
   border-radius: 20px 20px 8px 8px;
+  z-index: 2;
   position: relative;
-  box-shadow: inset 0 8px 12px rgba(255, 255, 255, 0.3), 0 5px 15px rgba(0, 0, 0, 0.3);
-  z-index: 4;
+}
+
+.cake-tier-bottom {
+  width: 260px;
+  height: 82px;
+  background: linear-gradient(135deg, #6366f1, #4338ca);
+  border-radius: 14px 14px 16px 16px;
+  margin-top: -6px;
+  z-index: 1;
+  position: relative;
+}
+
+.frosting-crown {
+  position: absolute;
+  top: -8px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-around;
+  padding: 0 16px;
+  z-index: 3;
+}
+
+.frosting-piping {
+  width: 14px;
+  height: 12px;
+  background: #ffffff;
+  border-radius: 50% 50% 20% 20%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.frosting-ribbon-gold {
+  position: absolute;
+  top: 10px;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #f59e0b, #fef08a, #d97706);
+  opacity: 0.85;
+}
+
+/* Realistic Wedge Cut - Exclusively on Top Tier Cake */
+.cake-wedge-cut {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 38px;
+  width: 34px;
+  background: rgba(15, 23, 42, 0.94);
+  box-shadow: inset 3px 0 8px rgba(0, 0, 0, 0.75), inset -3px 0 8px rgba(0, 0, 0, 0.75);
+  opacity: 0;
+  transform: scaleY(0);
+  transform-origin: top center;
+  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  flex-direction: column;
+  border-left: 2px dashed rgba(255, 255, 255, 0.35);
+  border-right: 2px dashed rgba(255, 255, 255, 0.35);
+  border-radius: 4px 4px 6px 6px;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.cake-container.is-cut .cake-wedge-cut {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+.sponge-layer {
+  flex: 1;
+  background: repeating-linear-gradient(90deg, #fef08a, #fde047 3px, #f59e0b 6px);
+}
+
+.cream-layer {
+  height: 7px;
+  background: #ffffff;
+  box-shadow: 0 0 3px rgba(236, 72, 153, 0.5);
 }
 
 .frosting-drips {
   position: absolute;
-  bottom: -8px;
+  bottom: -6px;
   left: 0;
   right: 0;
   height: 12px;
   background: #fdf2f8;
   border-radius: 0 0 12px 12px;
-}
-
-.cake-bottom-layer {
-  width: 250px;
-  height: 80px;
-  background: linear-gradient(135deg, #4f46e5, #312e81);
-  border-radius: 12px 12px 16px 16px;
-  position: relative;
-  margin-top: -6px;
-  box-shadow: inset 0 8px 12px rgba(255, 255, 255, 0.25), 0 12px 25px rgba(0, 0, 0, 0.4);
   z-index: 3;
 }
 
+.frosting-drips.bottom-drips {
+  background: #ede9fe;
+}
+
+/* Served Cake Dish that slides forward into view */
+.served-cake-dish {
+  position: absolute;
+  bottom: -25px;
+  right: 25px;
+  transform: translateY(40px) scale(0.4);
+  opacity: 0;
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.75s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+}
+
+.cake-container.is-cut .served-cake-dish {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.dessert-plate {
+  width: 135px;
+  height: 12px;
+  background: linear-gradient(90deg, #f59e0b, #fef08a, #d97706);
+  border-radius: 50px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
+  margin-top: 4px;
+}
+
+.fresh-cake-slice {
+  width: 70px;
+  height: 58px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.5));
+}
+
+.slice-berry {
+  font-size: 1.4rem;
+  margin-bottom: -6px;
+  z-index: 2;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+  animation: floatBerry 2s ease-in-out infinite alternate;
+}
+
+@keyframes floatBerry {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-3px); }
+}
+
+.slice-frosting {
+  width: 60px;
+  height: 10px;
+  background: #fdf2f8;
+  border-radius: 8px 8px 0 0;
+}
+
+.slice-sponge {
+  width: 60px;
+  height: 18px;
+  background: linear-gradient(90deg, #ec4899, #be185d);
+}
+
+.slice-cream {
+  width: 60px;
+  height: 7px;
+  background: #ffffff;
+}
+
+.slice-badge {
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid #fbbf24;
+  color: #fef08a;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-top: 6px;
+  white-space: nowrap;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.35);
+}
+
 .cake-plate {
-  width: 290px;
+  width: 295px;
   height: 14px;
   background: linear-gradient(90deg, #cbd5e1, #f8fafc, #94a3b8);
   border-radius: 50px;
@@ -1588,7 +1855,7 @@ nav {
 
 .wishes-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
   gap: 1.75rem;
   margin-bottom: 3.5rem;
 }
@@ -1893,15 +2160,162 @@ footer {
   margin-bottom: 1.5rem;
 }
 
-/* Media Queries for Responsive Design */
+/* ========================================================
+   MODAL DIALOG & EMPTY STATE STYLING
+   ======================================================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 10, 20, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-dialog {
+  background: linear-gradient(135deg, rgba(24, 30, 58, 0.98), rgba(14, 18, 36, 0.99));
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 28px;
+  padding: 2.25rem;
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 30px 80px -15px rgba(0, 0, 0, 0.9), 0 0 40px rgba(245, 158, 11, 0.15);
+  transform: scale(0.92) translateY(20px);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-overlay.open .modal-dialog {
+  transform: scale(1) translateY(0);
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.modal-close-btn:hover {
+  background: rgba(244, 63, 94, 0.25);
+  border-color: #f43f5e;
+  transform: rotate(90deg);
+}
+
+/* Empty State Placeholder for Wishes */
+.wishes-empty-box {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 4rem 2rem;
+  border-radius: 24px;
+  background: rgba(18, 22, 42, 0.5);
+  border: 2px dashed rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(12px);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.wishes-empty-box .empty-icon {
+  font-size: 3.5rem;
+  margin-bottom: 0.8rem;
+  animation: floatOrb 4s ease-in-out infinite;
+}
+
+.wishes-empty-box h3 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+
+.wishes-empty-box p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  max-width: 440px;
+  margin: 0 auto 1.5rem;
+}
+
+/* Mobile Nav Drawer */
+.mobile-nav-drawer {
+  background: rgba(10, 11, 20, 0.98);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  animation: slideDown 0.25s ease forwards;
+}
+
+@keyframes slideDown {
+  0% { opacity: 0; transform: translateY(-10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.mobile-nav-link {
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.mobile-nav-link:hover, .mobile-nav-link:active {
+  background: rgba(99, 102, 241, 0.2);
+  color: #fff;
+}
+
+.mobile-only {
+  display: none !important;
+}
+
+/* Media Queries for Comprehensive Responsive Design across All Devices */
 @media (max-width: 1024px) {
   .podium-grid {
     grid-template-columns: 1fr;
-    gap: 2.5rem;
+    gap: 2.25rem;
   }
 
   .center-podium {
     order: -1;
+  }
+
+  .chibi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .wishes-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
   }
 
   .metrics-strip {
@@ -1911,68 +2325,529 @@ footer {
 }
 
 @media (max-width: 768px) {
+  /* Prevent horizontal scroll */
+  html, body {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
+
+  /* Navigation Bar */
+  .mobile-only {
+    display: flex !important;
+  }
+
+  .nav-links {
+    display: none !important;
+  }
+
+  .nav-container {
+    padding: 0.75rem 1rem;
+  }
+
+  .company-logo-img {
+    height: 38px;
+  }
+
+  .celebrate-text {
+    display: none;
+  }
+
+  #global-celebrate-btn {
+    padding: 8px 12px;
+  }
+
+  /* Announcement Bar */
+  .top-announcement-bar {
+    font-size: 0.72rem;
+    padding: 6px 10px;
+    flex-wrap: wrap;
+    line-height: 1.4;
+    text-align: center;
+    justify-content: center;
+  }
+
+  /* Hero Section */
+  .hero-showcase {
+    padding: 2rem 1rem 3.5rem;
+  }
+
+  .hero-center-head {
+    max-width: 100%;
+    margin-bottom: 2rem;
+  }
+
+  .crown-badge {
+    font-size: 0.72rem;
+    padding: 4px 12px;
+    margin-bottom: 0.75rem;
+  }
+
   .hero-showcase-title {
-    font-size: 2.8rem;
+    font-size: clamp(2rem, 7vw, 2.7rem);
+    line-height: 1.15;
   }
 
   .hero-showcase-title .ceo-name {
-    font-size: 3.2rem;
+    font-size: clamp(2.3rem, 8vw, 3.2rem);
+    display: block;
+    margin-top: 4px;
   }
 
+  .hero-showcase-sub {
+    font-size: 1rem;
+    line-height: 1.6;
+    max-width: 100%;
+    margin-bottom: 1.25rem;
+  }
+
+  .hero-quote-pill {
+    font-size: 0.8rem;
+    padding: 6px 14px;
+    max-width: 100%;
+    line-height: 1.4;
+  }
+
+  .hero-action-deck {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.85rem;
+  }
+
+  .hero-action-deck .btn-gold,
+  .hero-action-deck .btn-primary,
+  .hero-action-deck .btn-outline {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .podium-grid {
+    gap: 1.5rem;
+  }
+
+  .podium-card {
+    padding: 1.35rem 1.1rem;
+    border-radius: 20px;
+  }
+
+  .jolly-portrait-wrapper {
+    width: 280px;
+    height: 375px;
+    max-width: calc(100vw - 48px);
+  }
+
+  .portal-nameplate .name {
+    font-size: 1.05rem;
+  }
+
+  .portal-nameplate .sub {
+    font-size: 0.68rem;
+  }
+
+  /* Dial timer */
+  .dial-container {
+    gap: 6px;
+  }
+
+  .dial-box {
+    padding: 6px 2px;
+    border-radius: 10px;
+  }
+
+  .dial-number {
+    font-size: 1.25rem;
+  }
+
+  .dial-unit {
+    font-size: 0.6rem;
+  }
+
+  /* Vibe Buttons */
+  .vibe-buttons-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .vibe-btn {
+    padding: 8px 4px;
+    font-size: 0.8rem;
+  }
+
+  /* Metrics Strip */
   .metrics-strip {
     grid-template-columns: repeat(2, 1fr);
+    padding: 1rem 0.85rem;
+    gap: 0.85rem;
+  }
+
+  .metric-item:last-child {
+    grid-column: span 2;
   }
 
   .metric-item::after {
     display: none !important;
   }
 
+  .metric-val {
+    font-size: 1.35rem;
+  }
+
+  .metric-lbl {
+    font-size: 0.7rem;
+  }
+
+  /* Chibi Squad Arena */
+  .chibi-arena-section {
+    padding: 0 1rem;
+    margin-bottom: 4rem;
+  }
+
+  .arena-header h2 {
+    font-size: clamp(1.8rem, 6vw, 2.4rem);
+  }
+
+  .arena-header p {
+    font-size: 0.95rem;
+  }
+
+  .btn-party-all {
+    width: 100%;
+    justify-content: center;
+    font-size: 0.95rem;
+    padding: 12px 20px;
+  }
+
+  .chibi-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .chibi-card {
+    padding: 1.35rem 1rem;
+    border-radius: 20px;
+    width: 100%;
+  }
+
+  .chibi-canvas-wrap {
+    width: 180px;
+    height: 180px;
+  }
+
+  .chibi-card canvas {
+    width: 180px !important;
+    height: 180px !important;
+  }
+
+  .btn-chibi-action {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Cake Section */
+  .cake-section {
+    padding: 2.5rem 1rem;
+    margin-bottom: 4rem;
+  }
+
   .cake-wrapper {
     grid-template-columns: 1fr;
     text-align: center;
+    gap: 1.75rem;
+  }
+
+  .cake-stage {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    overflow: visible;
+  }
+
+  .cake-container {
+    width: 100%;
+    max-width: 290px;
+    transform-origin: center bottom;
+    transform: scale(0.92);
   }
 
   .cake-controls {
     align-items: center;
+    width: 100%;
+    padding: 0 0.5rem;
+  }
+
+  .cake-controls h3 {
+    font-size: clamp(1.6rem, 5vw, 2rem);
   }
 
   .cake-btn-group {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.65rem;
+  }
+
+  .cake-btn-group button {
+    width: 100%;
+    justify-content: center;
+    font-size: 0.95rem;
+    padding: 11px 18px;
+  }
+
+  /* Leadership Section */
+  .pillars-section {
+    padding: 0 1rem;
+    margin-bottom: 4rem;
+  }
+
+  .section-head h2 {
+    font-size: clamp(1.8rem, 6vw, 2.4rem);
+  }
+
+  .pillars-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .pillar-card {
+    padding: 1.35rem 1.1rem;
+    border-radius: 20px;
+  }
+
+  /* Wishes Section */
+  .wishes-section {
+    padding: 0 1rem;
+    margin-bottom: 4rem;
+  }
+
+  .wishes-top-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.85rem;
+  }
+
+  #btn-open-wish-modal {
+    width: 100%;
     justify-content: center;
   }
 
-  .nav-links {
+  .filter-pills {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 6px;
+    width: 100%;
+    gap: 6px;
+  }
+
+  .filter-pills::-webkit-scrollbar {
     display: none;
   }
-}
 
-@media (max-width: 480px) {
-  .hero-showcase-title {
-    font-size: 2.2rem;
+  .filter-pills .filter-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    padding: 7px 14px;
   }
 
-  .hero-showcase-title .ceo-name {
-    font-size: 2.5rem;
-  }
-
-  .portal-wrapper {
-    width: 280px;
-    height: 350px;
-  }
-
-  .portal-glow-orbit {
-    width: 300px;
-    height: 370px;
-  }
-
-  .metrics-strip {
+  .wishes-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .wish-card {
+    padding: 1.25rem 1rem;
+    border-radius: 18px;
+  }
+
+  .wishes-empty-box {
+    padding: 2rem 1.25rem;
+    border-radius: 20px;
+  }
+
+  /* Tribute Section */
+  .tribute-section {
+    padding: 0 1rem;
+    margin-bottom: 4rem;
+  }
+
+  .tribute-card {
+    padding: 2rem 1.25rem;
+    border-radius: 22px;
+  }
+
+  .quote-mark {
+    font-size: 3.5rem;
+  }
+
+  .tribute-card p {
+    font-size: 1.05rem;
+    line-height: 1.6;
+  }
+
+  /* Footer */
+  footer {
+    padding: 3rem 1rem 2rem;
+  }
+
+  .footer-logo-img {
+    height: 44px;
+  }
+
+  /* Modal Dialog */
+  .modal-overlay {
+    padding: 0.75rem;
+  }
+
+  .modal-dialog {
+    padding: 1.5rem 1rem;
+    border-radius: 20px;
+    max-height: 94vh;
+    width: 100%;
+    max-width: 520px;
   }
 
   .form-grid {
     grid-template-columns: 1fr;
+    gap: 0.85rem;
   }
 
-  .post-wish-box {
-    padding: 1.5rem;
+  .emoji-selector {
+    justify-content: space-between;
+  }
+
+  /* Cheer Blaster */
+  .cheer-blaster {
+    bottom: 15px;
+    right: 15px;
+  }
+
+  .cheer-pill {
+    padding: 10px 18px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .top-announcement-bar {
+    font-size: 0.68rem;
+    padding: 5px 8px;
+  }
+
+  .company-logo-img {
+    height: 32px;
+  }
+
+  .hero-showcase-title {
+    font-size: 1.85rem;
+  }
+
+  .hero-showcase-title .ceo-name {
+    font-size: 2.15rem;
+  }
+
+  .jolly-portrait-wrapper {
+    width: 255px;
+    height: 340px;
+    max-width: calc(100vw - 32px);
+  }
+
+  .vibe-buttons-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  .cake-container {
+    transform: scale(0.88);
+    transform-origin: center bottom;
+  }
+
+  .dial-number {
+    font-size: 1.15rem;
+  }
+
+  .dial-unit {
+    font-size: 0.58rem;
+  }
+
+  .metrics-strip {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .metric-item:last-child {
+    grid-column: span 1;
+  }
+
+  .chibi-canvas-wrap {
+    width: 160px;
+    height: 160px;
+  }
+
+  .chibi-card canvas {
+    width: 160px !important;
+    height: 160px !important;
+  }
+
+  .cheer-pill {
+    padding: 8px 14px;
+    font-size: 0.78rem;
+  }
+
+  .cheer-blaster {
+    bottom: 12px;
+    right: 12px;
+  }
+}
+
+@media (max-width: 360px) {
+  .company-logo-img {
+    height: 28px;
+  }
+
+  .nav-container {
+    padding: 0.5rem 0.6rem;
+  }
+
+  #toggle-music, #mobile-menu-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 0.85rem;
+  }
+
+  #global-celebrate-btn {
+    padding: 5px 8px;
+    font-size: 0.75rem;
+  }
+
+  .hero-showcase {
+    padding: 1rem 0.5rem 2rem;
+  }
+
+  .hero-showcase-title {
+    font-size: 1.6rem;
+  }
+
+  .hero-showcase-title .ceo-name {
+    font-size: 1.9rem;
+  }
+
+  .jolly-portrait-wrapper {
+    width: 235px;
+    height: 315px;
+    max-width: calc(100vw - 24px);
+  }
+
+  .cake-container {
+    transform: scale(0.8);
+  }
+
+  .cake-section {
+    padding: 1.5rem 0.5rem;
+  }
+
+  .modal-dialog {
+    padding: 1.2rem 0.75rem;
   }
 }
