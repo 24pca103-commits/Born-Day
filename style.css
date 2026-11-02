@@ -3007,12 +3007,44 @@ footer {
   z-index: 2;
 }
 
+.gallery-section .section-head {
+  text-align: center;
+  max-width: 780px;
+  margin: 0 auto 3rem;
+  padding: 0 1rem;
+}
+
+.gallery-section .section-tag {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #f59e0b;
+  margin-bottom: 0.85rem;
+}
+
+.gallery-section .section-head h2 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1.35;
+  margin-bottom: 1.1rem;
+}
+
+.gallery-section .section-head p {
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  line-height: 1.8;
+  margin-bottom: 0;
+}
+
 .gallery-filters {
   display: flex;
-  gap: 0.65rem;
+  gap: 0.75rem;
   flex-wrap: wrap;
   justify-content: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: 2.8rem;
 }
 
 .gallery-filter-btn {
@@ -3125,13 +3157,14 @@ footer {
   font-size: 1.05rem;
   font-weight: 700;
   color: #fff;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
 }
 
 .gallery-card-desc {
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   color: var(--text-muted);
-  line-height: 1.5;
+  line-height: 1.65;
 }
 
 /* Lightbox Modal */
