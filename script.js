@@ -594,7 +594,7 @@ function initWishesBoard() {
   let storedWishes = JSON.parse(localStorage.getItem('ixly_ceo_wishes_v5')) || [];
   let isSyncingNewWish = false;
 
-  const CLOUD_BIN_URL = 'https://extendsclass.com/api/json-storage/bin/ebeefbc';
+  const CLOUD_BIN_URL = 'https://json.extendsclass.com/bin/ebeefbc';
 
   async function getRemoteWishes() {
     // 1. Try local or Vercel serverless /api/wishes

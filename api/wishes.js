@@ -1,4 +1,4 @@
-const CLOUD_STORAGE_URL = 'https://extendsclass.com/api/json-storage/bin/ebeefbc';
+const CLOUD_STORAGE_URL = 'https://json.extendsclass.com/bin/ebeefbc';
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
