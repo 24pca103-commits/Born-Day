@@ -1800,7 +1800,6 @@ function initMomentsGallery() {
           <div class="gallery-card-overlay"></div>
         </div>
         <div class="gallery-card-info">
-          <div class="gallery-card-letter-tag">Letter: <strong>${item.letter}</strong></div>
           <h3 class="gallery-card-title">${item.title}</h3>
           <p class="gallery-card-desc">${item.desc}</p>
         </div>
