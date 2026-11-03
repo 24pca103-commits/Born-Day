@@ -1,5 +1,43 @@
 const DB_OBJECT_URL = 'https://api.restful-api.dev/objects/ff808181a09d98f701a1a03d31a918d6';
 
+const DB_HEADERS = {
+  'Accept': 'application/json',
+  'Content-Type': 'application/json',
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+};
+
+async function getDBWishes() {
+  try {
+    const res = await fetch(DB_OBJECT_URL, { headers: DB_HEADERS });
+    if (!res.ok) return null;
+    const text = await res.text();
+    const json = JSON.parse(text);
+    if (json && json.data && Array.isArray(json.data.wishes)) {
+      return json.data.wishes;
+    }
+  } catch (err) {
+    console.error('getDBWishes error:', err);
+  }
+  return null;
+}
+
+async function saveDBWishes(wishes) {
+  try {
+    const res = await fetch(DB_OBJECT_URL, {
+      method: 'PUT',
+      headers: DB_HEADERS,
+      body: JSON.stringify({
+        name: 'ixly_wishes_db',
+        data: { wishes: wishes }
+      })
+    });
+    return res.ok;
+  } catch (err) {
+    console.error('saveDBWishes error:', err);
+    return false;
+  }
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -13,90 +51,80 @@ module.exports = async function handler(req, res) {
   }
 
   try {
+    // --- GET WISHES ---
     if (req.method === 'GET') {
-      const response = await fetch(DB_OBJECT_URL, {
-        headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+      const wishes = await getDBWishes();
+      return res.status(200).json(wishes || []);
+    }
+
+    // --- PARSE BODY ---
+    let body = req.body;
+    if (typeof body === 'string') {
+      try { body = JSON.parse(body); } catch (e) {}
+    }
+
+    // --- DELETE WISH (via DELETE method, or POST with action=delete, or URL /delete) ---
+    const url = req.url || '';
+    const isDelete = req.method === 'DELETE' || 
+                     (body && (body.action === 'delete' || url.includes('/delete')));
+
+    if (isDelete) {
+      let targetId = null;
+      if (body && body.id) {
+        targetId = String(body.id);
+      } else {
+        const cleanUrl = url.split('?')[0];
+        const segments = cleanUrl.split('/').filter(Boolean);
+        targetId = segments[segments.length - 1];
+        if (targetId === 'wishes' || targetId === 'delete') {
+          // Check query string
+          const queryMatch = url.match(/[?&]id=([^&]+)/);
+          if (queryMatch) targetId = queryMatch[1];
         }
-      });
-      const text = await response.text();
-      let json = null;
-      try { json = JSON.parse(text); } catch (e) {}
-
-      if (req.url && req.url.includes('debug=1')) {
-        return res.status(200).json({ status: response.status, rawText: text, json });
       }
 
-      const wishes = json && json.data && Array.isArray(json.data.wishes) ? json.data.wishes : [];
-      return res.status(200).json(wishes);
+      if (targetId) {
+        const current = (await getDBWishes()) || [];
+        const filtered = current.filter(w => String(w.id) !== String(targetId));
+        await saveDBWishes(filtered);
+        return res.status(200).json({ success: true, wishes: filtered });
+      }
+      return res.status(400).json({ error: 'Missing wish id to delete' });
     }
 
-    if (req.method === 'POST') {
-      let body = req.body;
-      if (typeof body === 'string') {
-        try { body = JSON.parse(body); } catch (e) {}
-      }
-
-      // If body is already a full array, save directly
-      if (Array.isArray(body)) {
-        await fetch(DB_OBJECT_URL, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: 'ixly_wishes_db', data: { wishes: body } })
-        });
-        return res.status(200).json(body);
-      }
-
-      // Fetch current list
-      const response = await fetch(DB_OBJECT_URL, { cache: 'no-store' });
-      const json = await response.json();
-      let currentWishes = json && json.data && Array.isArray(json.data.wishes) ? json.data.wishes : [];
-
-      const url = req.url || '';
-      if (url.includes('/like') && body && body.id) {
-        currentWishes = currentWishes.map(w => {
-          if (String(w.id) === String(body.id)) {
-            const currentLikes = w.likes || 0;
-            return { ...w, likes: body.liked ? currentLikes + 1 : Math.max(0, currentLikes - 1) };
-          }
-          return w;
-        });
-      } else if (url.includes('/delete') && body && body.id) {
-        currentWishes = currentWishes.filter(w => String(w.id) !== String(body.id));
-      } else if (body && body.name) {
-        // New wish
-        currentWishes = currentWishes.filter(w => String(w.id) !== String(body.id));
-        currentWishes.unshift(body);
-      }
-
-      await fetch(DB_OBJECT_URL, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: 'ixly_wishes_db', data: { wishes: currentWishes } })
+    // --- LIKE WISH ---
+    if (body && (body.action === 'like' || url.includes('/like')) && body.id) {
+      const current = (await getDBWishes()) || [];
+      const updated = current.map(w => {
+        if (String(w.id) === String(body.id)) {
+          const cur = w.likes || 0;
+          return { ...w, likes: body.liked ? cur + 1 : Math.max(0, cur - 1) };
+        }
+        return w;
       });
-
-      return res.status(200).json(currentWishes);
+      await saveDBWishes(updated);
+      return res.status(200).json({ success: true, wishes: updated });
     }
 
-    if (req.method === 'DELETE') {
-      const parts = (req.url || '').split('/');
-      const id = parts[parts.length - 1];
-      const response = await fetch(DB_OBJECT_URL, { cache: 'no-store' });
-      const json = await response.json();
-      let currentWishes = json && json.data && Array.isArray(json.data.wishes) ? json.data.wishes : [];
-      currentWishes = currentWishes.filter(w => String(w.id) !== String(id));
-      await fetch(DB_OBJECT_URL, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: 'ixly_wishes_db', data: { wishes: currentWishes } })
-      });
-      return res.status(200).json({ success: true, wishes: currentWishes });
+    // --- BULK ARRAY REPLACE (if passed full list) ---
+    if (Array.isArray(body)) {
+      await saveDBWishes(body);
+      return res.status(200).json(body);
     }
 
-    return res.status(405).json({ error: 'Method not allowed' });
-  } catch (error) {
-    console.error('API Error:', error);
-    return res.status(500).json({ error: 'Failed to process wish request' });
+    // --- POST NEW WISH ---
+    if (body && body.name) {
+      const current = (await getDBWishes()) || [];
+      // Remove any existing with same id
+      const filtered = current.filter(w => String(w.id) !== String(body.id));
+      filtered.unshift(body);
+      await saveDBWishes(filtered);
+      return res.status(200).json(filtered);
+    }
+
+    return res.status(400).json({ error: 'Invalid request payload' });
+  } catch (err) {
+    console.error('Server error:', err);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 };
