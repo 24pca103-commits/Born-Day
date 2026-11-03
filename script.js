@@ -592,9 +592,11 @@ function initWishesBoard() {
 
   // --- Shared Backend Wishes System ---
   let storedWishes = JSON.parse(localStorage.getItem('ixly_ceo_wishes_v5')) || [];
+  let deletedWishIds = JSON.parse(localStorage.getItem('ixly_deleted_wishes_v5')) || [];
+  let pendingNewWishes = JSON.parse(localStorage.getItem('ixly_pending_wishes_v5')) || [];
   let isSyncingNewWish = false;
 
-  const CLOUD_BIN_URL = 'https://json.extendsclass.com/bin/ebeefbc';
+  const CLOUD_DB_URL = 'https://api.restful-api.dev/objects/ff808181a09d98f701a1a03d31a918d6';
 
   async function getRemoteWishes() {
     // 1. Try local or Vercel serverless /api/wishes
@@ -608,10 +610,10 @@ function initWishesBoard() {
 
     // 2. Direct fallback to Cloud Storage
     try {
-      const res = await fetch(CLOUD_BIN_URL, { cache: 'no-store' });
+      const res = await fetch(CLOUD_DB_URL, { cache: 'no-store' });
       if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data)) return data;
+        const json = await res.json();
+        if (json && json.data && Array.isArray(json.data.wishes)) return json.data.wishes;
       }
     } catch (e) {}
 
@@ -632,10 +634,10 @@ function initWishesBoard() {
 
     // 2. Direct fallback to Cloud Storage
     try {
-      await fetch(CLOUD_BIN_URL, {
+      await fetch(CLOUD_DB_URL, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(wishesList)
+        body: JSON.stringify({ name: 'ixly_wishes_db', data: { wishes: wishesList } })
       });
       saved = true;
     } catch (e) {}
@@ -653,49 +655,32 @@ function initWishesBoard() {
 
       if (isSyncingNewWish) return;
 
-      // If remote has no wishes but local has wishes, upload local wishes to cloud
-      if (remoteWishes.length === 0 && storedWishes.length > 0) {
-        await syncWishesToRemote(storedWishes);
-        render(currentFilter);
-        return;
+      // Filter out any locally deleted wishes from remote
+      let cleanedRemote = remoteWishes.filter(w => !deletedWishIds.includes(String(w.id)));
+
+      // If remote contained a wish that was deleted locally, clean remote immediately
+      if (cleanedRemote.length < remoteWishes.length) {
+        syncWishesToRemote(cleanedRemote);
       }
 
-      // Merge logic: Combine local + remote wishes by unique ID
-      const wishMap = new Map();
-
-      // First add remote wishes
-      remoteWishes.forEach(w => {
-        if (w && w.id) wishMap.set(String(w.id), w);
-      });
-
-      // Next check local wishes: if local has a wish not on remote, keep it
-      let hasLocalOnly = false;
-      storedWishes.forEach(localW => {
-        if (localW && localW.id) {
-          const key = String(localW.id);
-          if (!wishMap.has(key)) {
-            wishMap.set(key, localW);
-            hasLocalOnly = true;
-          } else {
-            // Keep whichever has higher likes
-            const remoteW = wishMap.get(key);
-            remoteW.likes = Math.max(remoteW.likes || 0, localW.likes || 0);
+      // If there are pending new wishes submitted locally while offline, merge them in
+      if (pendingNewWishes.length > 0) {
+        const remoteIds = new Set(cleanedRemote.map(w => String(w.id)));
+        pendingNewWishes.forEach(pw => {
+          if (!remoteIds.has(String(pw.id)) && !deletedWishIds.includes(String(pw.id))) {
+            cleanedRemote.unshift(pw);
           }
-        }
-      });
+        });
+      }
 
-      const mergedList = Array.from(wishMap.values()).sort((a, b) => {
+      // Sort by newest first
+      cleanedRemote.sort((a, b) => {
         const timeA = new Date(a.createdAt || a.id).getTime() || 0;
         const timeB = new Date(b.createdAt || b.id).getTime() || 0;
         return timeB - timeA;
       });
 
-      // If there were local wishes missing from server, upload merged list so other devices see them
-      if (hasLocalOnly) {
-        await syncWishesToRemote(mergedList);
-      }
-
-      storedWishes = mergedList;
+      storedWishes = cleanedRemote;
       localStorage.setItem('ixly_ceo_wishes_v5', JSON.stringify(storedWishes));
       render(currentFilter);
     } catch (e) {
@@ -855,14 +840,30 @@ function initWishesBoard() {
         const namePreview = wishToDelete ? `from "${wishToDelete.name}"` : '';
 
         if (confirm(`Remove this birthday wish ${namePreview}?`)) {
-          storedWishes = storedWishes.filter(item => String(item.id) !== String(id));
+          const stringId = String(id);
+
+          // 1. Mark as deleted locally so it never resurfaces
+          if (!deletedWishIds.includes(stringId)) {
+            deletedWishIds.push(stringId);
+            localStorage.setItem('ixly_deleted_wishes_v5', JSON.stringify(deletedWishIds));
+          }
+
+          // 2. Remove from pending if it was pending
+          pendingNewWishes = pendingNewWishes.filter(w => String(w.id) !== stringId);
+          localStorage.setItem('ixly_pending_wishes_v5', JSON.stringify(pendingNewWishes));
+
+          // 3. Remove from stored wishes
+          storedWishes = storedWishes.filter(item => String(item.id) !== stringId);
           localStorage.setItem('ixly_ceo_wishes_v5', JSON.stringify(storedWishes));
           sounds.playPop();
           render(currentFilter);
           showToast("🗑️ Wish removed successfully!");
 
-          // Delete from shared cloud / server
+          // 4. Delete from shared cloud & server database immediately
           syncWishesToRemote(storedWishes);
+
+          // 5. Also trigger backend delete API
+          fetch(`/api/wishes/${id}`, { method: 'DELETE' }).catch(() => {});
         }
       });
     });
@@ -960,6 +961,9 @@ function initWishesBoard() {
       storedWishes.unshift(newWish);
       localStorage.setItem('ixly_ceo_wishes_v5', JSON.stringify(storedWishes));
 
+      pendingNewWishes.unshift(newWish);
+      localStorage.setItem('ixly_pending_wishes_v5', JSON.stringify(pendingNewWishes));
+
       // Reset to "All Wishes" tab so the new wish is immediately visible to everyone
       currentFilter = 'all';
       filterBtns.forEach(b => {
@@ -970,6 +974,9 @@ function initWishesBoard() {
 
       // Post to shared server and cloud so EVERY phone and laptop sees this wish
       syncWishesToRemote(storedWishes).then(() => {
+        pendingNewWishes = pendingNewWishes.filter(w => String(w.id) !== String(newWish.id));
+        localStorage.setItem('ixly_pending_wishes_v5', JSON.stringify(pendingNewWishes));
+
         setTimeout(() => {
           isSyncingNewWish = false;
           fetchSharedWishes();

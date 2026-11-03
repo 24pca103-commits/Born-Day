@@ -1,4 +1,4 @@
-const CLOUD_STORAGE_URL = 'https://json.extendsclass.com/bin/ebeefbc';
+const DB_OBJECT_URL = 'https://api.restful-api.dev/objects/ff808181a09d98f701a1a03d31a918d6';
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -11,9 +11,10 @@ module.exports = async function handler(req, res) {
 
   try {
     if (req.method === 'GET') {
-      const response = await fetch(CLOUD_STORAGE_URL, { cache: 'no-store' });
-      const data = await response.json();
-      return res.status(200).json(Array.isArray(data) ? data : []);
+      const response = await fetch(DB_OBJECT_URL, { cache: 'no-store' });
+      const json = await response.json();
+      const wishes = json && json.data && Array.isArray(json.data.wishes) ? json.data.wishes : [];
+      return res.status(200).json(wishes);
     }
 
     if (req.method === 'POST') {
@@ -22,20 +23,20 @@ module.exports = async function handler(req, res) {
         try { body = JSON.parse(body); } catch (e) {}
       }
 
-      // If body is already a full array, replace directly
+      // If body is already a full array, save directly
       if (Array.isArray(body)) {
-        await fetch(CLOUD_STORAGE_URL, {
+        await fetch(DB_OBJECT_URL, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
+          body: JSON.stringify({ name: 'ixly_wishes_db', data: { wishes: body } })
         });
         return res.status(200).json(body);
       }
 
       // Fetch current list
-      const response = await fetch(CLOUD_STORAGE_URL, { cache: 'no-store' });
-      let currentWishes = await response.json();
-      if (!Array.isArray(currentWishes)) currentWishes = [];
+      const response = await fetch(DB_OBJECT_URL, { cache: 'no-store' });
+      const json = await response.json();
+      let currentWishes = json && json.data && Array.isArray(json.data.wishes) ? json.data.wishes : [];
 
       const url = req.url || '';
       if (url.includes('/like') && body && body.id) {
@@ -54,10 +55,10 @@ module.exports = async function handler(req, res) {
         currentWishes.unshift(body);
       }
 
-      await fetch(CLOUD_STORAGE_URL, {
+      await fetch(DB_OBJECT_URL, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(currentWishes)
+        body: JSON.stringify({ name: 'ixly_wishes_db', data: { wishes: currentWishes } })
       });
 
       return res.status(200).json(currentWishes);
@@ -66,17 +67,16 @@ module.exports = async function handler(req, res) {
     if (req.method === 'DELETE') {
       const parts = (req.url || '').split('/');
       const id = parts[parts.length - 1];
-      const response = await fetch(CLOUD_STORAGE_URL, { cache: 'no-store' });
-      let currentWishes = await response.json();
-      if (Array.isArray(currentWishes)) {
-        currentWishes = currentWishes.filter(w => String(w.id) !== String(id));
-        await fetch(CLOUD_STORAGE_URL, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(currentWishes)
-        });
-      }
-      return res.status(200).json({ success: true });
+      const response = await fetch(DB_OBJECT_URL, { cache: 'no-store' });
+      const json = await response.json();
+      let currentWishes = json && json.data && Array.isArray(json.data.wishes) ? json.data.wishes : [];
+      currentWishes = currentWishes.filter(w => String(w.id) !== String(id));
+      await fetch(DB_OBJECT_URL, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'ixly_wishes_db', data: { wishes: currentWishes } })
+      });
+      return res.status(200).json({ success: true, wishes: currentWishes });
     }
 
     return res.status(405).json({ error: 'Method not allowed' });
