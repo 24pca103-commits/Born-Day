@@ -4,6 +4,9 @@ module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -11,8 +14,20 @@ module.exports = async function handler(req, res) {
 
   try {
     if (req.method === 'GET') {
-      const response = await fetch(DB_OBJECT_URL, { cache: 'no-store' });
-      const json = await response.json();
+      const response = await fetch(DB_OBJECT_URL, {
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+        }
+      });
+      const text = await response.text();
+      let json = null;
+      try { json = JSON.parse(text); } catch (e) {}
+
+      if (req.url && req.url.includes('debug=1')) {
+        return res.status(200).json({ status: response.status, rawText: text, json });
+      }
+
       const wishes = json && json.data && Array.isArray(json.data.wishes) ? json.data.wishes : [];
       return res.status(200).json(wishes);
     }
