@@ -716,7 +716,8 @@ function initWishesBoard() {
       dev: storedWishes.filter(w => w.department === 'dev').length,
       manager: storedWishes.filter(w => w.department === 'manager').length,
       hr: storedWishes.filter(w => w.department === 'hr').length,
-      client: storedWishes.filter(w => w.department === 'client').length
+      marketing: storedWishes.filter(w => w.department === 'marketing').length,
+      family: storedWishes.filter(w => w.department === 'family').length
     };
 
     filterBtns.forEach(btn => {
@@ -726,7 +727,8 @@ function initWishesBoard() {
         dev: 'Developer Team 💻',
         manager: 'Manager Team 📊',
         hr: 'HR Team 🤝',
-        client: 'Client Team 🌐'
+        marketing: 'Marketing Team 📢',
+        family: 'Friends & Family ❤️'
       }[f] || f;
       
       const count = counts[f] || 0;
@@ -789,7 +791,8 @@ function initWishesBoard() {
         dev: "Developer Team 💻",
         manager: "Manager Team 📊",
         hr: "HR Team 🤝",
-        client: "Client Team 🌐"
+        marketing: "Marketing Team 📢",
+        family: "Friends & Family ❤️"
       };
       const deptLabel = deptNames[filter] || "Ixly Technologies";
 
@@ -934,7 +937,8 @@ function initWishesBoard() {
         dev: '💻 Developer Team',
         manager: '📊 Manager Team',
         hr: '🤝 HR Team',
-        client: '🌐 Client Team'
+        marketing: '📢 Marketing Team',
+        family: '❤️ Friends & Family'
       };
 
       const newWish = {
