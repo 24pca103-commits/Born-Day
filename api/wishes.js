@@ -1,30 +1,28 @@
-const DB_OBJECT_URL = 'https://api.restful-api.dev/objects/ff808181a09d98f701a1a03d31a918d6';
+const CLOUD_STORAGE_URL = 'https://json.extendsclass.com/bin/ebeefbc';
 
-const DB_HEADERS = {
+const HEADERS = {
   'Accept': 'application/json',
   'Content-Type': 'application/json'
 };
 
 async function getDBWishes() {
   try {
-    const res = await fetch(DB_OBJECT_URL, { headers: DB_HEADERS });
+    const res = await fetch(CLOUD_STORAGE_URL, { headers: HEADERS, cache: 'no-store' });
     if (!res.ok) return [];
     const json = await res.json();
-    if (json && json.data && Array.isArray(json.data.wishes)) {
-      return json.data.wishes;
-    }
+    return Array.isArray(json) ? json : [];
   } catch (err) {
     console.error('getDBWishes error:', err.message);
+    return [];
   }
-  return [];
 }
 
 async function saveDBWishes(wishes) {
   try {
-    const res = await fetch(DB_OBJECT_URL, {
+    const res = await fetch(CLOUD_STORAGE_URL, {
       method: 'PUT',
-      headers: DB_HEADERS,
-      body: JSON.stringify({ name: 'ixly_wishes_db', data: { wishes } })
+      headers: HEADERS,
+      body: JSON.stringify(wishes)
     });
     return res.ok;
   } catch (err) {
@@ -34,32 +32,35 @@ async function saveDBWishes(wishes) {
 }
 
 module.exports = async function handler(req, res) {
-  // CORS + no-cache
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0, s-maxage=0');
   res.setHeader('Pragma', 'no-cache');
 
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method === 'HEAD') return res.status(200).end();
+  if (req.method === 'OPTIONS' || req.method === 'HEAD') {
+    return res.status(200).end();
+  }
 
   try {
-    // GET — read all wishes
+    // --- GET ALL WISHES ---
     if (req.method === 'GET') {
-      return res.status(200).json(await getDBWishes());
+      const wishes = await getDBWishes();
+      return res.status(200).json(wishes);
     }
 
-    // Parse body
+    // --- PARSE BODY ---
     let body = req.body;
-    if (typeof body === 'string') try { body = JSON.parse(body); } catch (_) {}
+    if (typeof body === 'string') {
+      try { body = JSON.parse(body); } catch (_) {}
+    }
 
     const url = req.url || '';
 
-    // DELETE by method or by action field
+    // --- DELETE WISH ---
     const isDelete = req.method === 'DELETE' ||
-      (body && body.action === 'delete') ||
-      url.includes('/delete');
+                     (body && body.action === 'delete') ||
+                     url.includes('/delete');
 
     if (isDelete) {
       let targetId = body && body.id ? String(body.id) : null;
@@ -68,15 +69,21 @@ module.exports = async function handler(req, res) {
         targetId = segs[segs.length - 1];
         if (targetId === 'wishes') targetId = null;
       }
-      if (!targetId) return res.status(400).json({ error: 'Missing id' });
+      if (!targetId) {
+        const queryMatch = url.match(/[?&]id=([^&]+)/);
+        if (queryMatch) targetId = queryMatch[1];
+      }
 
-      const current = await getDBWishes();
-      const filtered = current.filter(w => String(w.id) !== targetId);
-      await saveDBWishes(filtered);
-      return res.status(200).json({ success: true, wishes: filtered });
+      if (targetId) {
+        const current = await getDBWishes();
+        const filtered = current.filter(w => String(w.id) !== String(targetId));
+        await saveDBWishes(filtered);
+        return res.status(200).json({ success: true, wishes: filtered });
+      }
+      return res.status(400).json({ error: 'Missing wish id to delete' });
     }
 
-    // LIKE
+    // --- LIKE WISH ---
     if (body && body.action === 'like' && body.id) {
       const current = await getDBWishes();
       const updated = current.map(w => {
@@ -90,15 +97,16 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ success: true, wishes: updated });
     }
 
-    // BULK replace (array body)
+    // --- BULK ARRAY REPLACE ---
     if (Array.isArray(body)) {
       await saveDBWishes(body);
       return res.status(200).json(body);
     }
 
-    // ADD new wish (object with name)
+    // --- POST NEW WISH ---
     if (body && body.name) {
       const current = await getDBWishes();
+      // Remove any existing with same id to prevent duplicate
       const deduped = current.filter(w => String(w.id) !== String(body.id));
       deduped.unshift(body);
       await saveDBWishes(deduped);
@@ -107,7 +115,7 @@ module.exports = async function handler(req, res) {
 
     return res.status(400).json({ error: 'Invalid payload' });
   } catch (err) {
-    console.error('Handler error:', err);
-    return res.status(500).json({ error: 'Server error' });
+    console.error('API Handler Error:', err);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 };
